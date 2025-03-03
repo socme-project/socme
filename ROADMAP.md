@@ -1,0 +1,46 @@
+# Open-SOC Roadmap
+
+- [-] ***BUILD***
+  - [ ] Documentation
+  - [-] **Infrastructure**
+    - [-] Configuration NixOS
+      - [-] Artemis
+        - [ ] CI/CD ([note](https://mccd.space/posts/git-to-deploy/))
+        - [ ] Wazuh
+          - [ ] Clean NixOS config
+          - [ ] Update ruleset/custom ruleset (cron)
+        - [ ] Suricata
+        - [ ] Tailscale
+        - [ ] Open-SOC Status
+        - [ ] TheHive
+        - [ ] NixOps
+        - [-] Hardening
+      - [-] Zeus
+        - [ ] Headscale
+          - [ ] ACL
+        - [-] Open-SOC Frontend & backend
+        - [ ] CI/CD
+        - [ ] NixOps
+        - [-] Hardening
+      - [ ] Hermes
+        - [ ] CI/CD
+        - [ ] Kiosk mode (see cage)
+        - [ ] NixOps
+        - [ ] Hardening
+  - [-] **Applications**
+    - [-] Open-SOC Frontend (sveltekit)
+    - [-] Open-SOC Backend (golang)
+      - [ ] Managing users
+      - [ ] Managing clients
+      - [ ] Managing alerts (cron)
+      - [-] Wazuh API
+        - [ ] Get alerts
+        - [x] Get agents
+        - [x] Get status
+        - [x] Get version
+    - [ ] Open-SOC CLI (bash, on new tty, w/open-ops)
+    - [ ] Open-Ops
+    - [ ] Status app
+- [ ] ***RUN***
+  - [ ] Démarcher des clients
+  - [ ] ...
