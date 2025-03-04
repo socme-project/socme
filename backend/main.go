@@ -71,8 +71,6 @@ func main() {
 	}
 	backend.Router = gin.Default()
 
-	// TODO: Make first user admin
-
 	backend.AuthRoutes()
 	backend.UserRoutes()
 	backend.ClientRoutes()
