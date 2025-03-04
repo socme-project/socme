@@ -23,12 +23,12 @@
         },
         {
           title: "Alerts",
-          url: "/alerts",
+          url: "/dashboard/alerts",
           icon: ShieldAlert,
         },
         {
           title: "Clients",
-          url: "/clients",
+          url: "/dashboard/clients",
           icon: Folder,
         },
         {

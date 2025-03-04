@@ -48,7 +48,7 @@
         },
         {
           title: "TV View",
-          url: "/dashboard/tv-view",
+          url: "/tv-view",
           icon: Tv,
         },
         {
