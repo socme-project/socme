@@ -28,9 +28,9 @@ type Oauth struct {
 }
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
-		log.Println("Error loading .env file: ", err)
+		log.Println("Error loading .env file in the root folder: ", err)
 	}
 
 	backend := Backend{
