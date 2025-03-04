@@ -1,0 +1,96 @@
+{
+  "_index": "wazuh-alerts-4.x-2025.03.03",
+  "_id": "RaK7XJUBFGgYT1lbMTph",
+  "_version": 1,
+  "_score": null,
+  "_source": {
+    "input": {
+      "type": "log"
+    },
+    "agent": {
+      "ip": "192.168.1.103",
+      "name": "windows",
+      "id": "001"
+    },
+    "manager": {
+      "name": "wazuh.manager"
+    },
+    "data": {
+      "win": {
+        "eventdata": {
+          "originalFileName": "PowerShell.EXE",
+          "image": "C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe",
+          "product": "Microsoft® Windows® Operating System",
+          "parentProcessGuid": "{4f767b5e-d074-67c5-cc0a-000000000300}",
+          "description": "Windows PowerShell",
+          "logonGuid": "{4f767b5e-d073-67c5-c760-8e0200000000}",
+          "parentCommandLine": "C:\\\\Windows\\\\Explorer.EXE",
+          "processGuid": "{4f767b5e-d1ae-67c5-6b0b-000000000300}",
+          "logonId": "0x28e60c7",
+          "parentProcessId": "5496",
+          "processId": "7292",
+          "currentDirectory": "C:\\\\Windows\\\\system32\\\\",
+          "utcTime": "2025-03-03 15:58:38.942",
+          "hashes": "MD5=2E5A8590CF6848968FC23DE3FA1E25F1",
+          "parentImage": "C:\\\\Windows\\\\explorer.exe",
+          "company": "Microsoft Corporation",
+          "commandLine": "\\\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\"",
+          "integrityLevel": "High",
+          "fileVersion": "10.0.19041.3996 (WinBuild.160101.0800)",
+          "user": "DESKTOP-JR3H2QV\\\\windows",
+          "terminalSessionId": "2",
+          "parentUser": "DESKTOP-JR3H2QV\\\\windows"
+        },
+        "system": {
+          "eventID": "1",
+          "keywords": "0x8000000000000000",
+          "providerGuid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+          "level": "4",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "opcode": "0",
+          "message": "\"Process Create:\r\nRuleName: -\r\nUtcTime: 2025-03-03 15:58:38.942\r\nProcessGuid: {4f767b5e-d1ae-67c5-6b0b-000000000300}\r\nProcessId: 7292\r\nImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\r\nFileVersion: 10.0.19041.3996 (WinBuild.160101.0800)\r\nDescription: Windows PowerShell\r\nProduct: Microsoft® Windows® Operating System\r\nCompany: Microsoft Corporation\r\nOriginalFileName: PowerShell.EXE\r\nCommandLine: \"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" \r\nCurrentDirectory: C:\\Windows\\system32\\\r\nUser: DESKTOP-JR3H2QV\\windows\r\nLogonGuid: {4f767b5e-d073-67c5-c760-8e0200000000}\r\nLogonId: 0x28E60C7\r\nTerminalSessionId: 2\r\nIntegrityLevel: High\r\nHashes: MD5=2E5A8590CF6848968FC23DE3FA1E25F1\r\nParentProcessGuid: {4f767b5e-d074-67c5-cc0a-000000000300}\r\nParentProcessId: 5496\r\nParentImage: C:\\Windows\\explorer.exe\r\nParentCommandLine: C:\\Windows\\Explorer.EXE\r\nParentUser: DESKTOP-JR3H2QV\\windows\"",
+          "version": "5",
+          "systemTime": "2025-03-03T15:58:38.9453365Z",
+          "eventRecordID": "67",
+          "threadID": "8740",
+          "computer": "DESKTOP-JR3H2QV",
+          "task": "1",
+          "processID": "2796",
+          "severityValue": "INFORMATION",
+          "providerName": "Microsoft-Windows-Sysmon"
+        }
+      }
+    },
+    "rule": {
+      "firedtimes": 8,
+      "mail": true,
+      "level": 12,
+      "description": "Microsoft Office Product Spawning Windows Shell",
+      "groups": [
+        "sysmon",
+        "sysmon_process-anomalies"
+      ],
+      "id": "255008"
+    },
+    "location": "EventChannel",
+    "decoder": {
+      "name": "windows_eventchannel"
+    },
+    "id": "1741017519.709787",
+    "full_log": "{\"win\":{\"system\":{\"providerName\":\"Microsoft-Windows-Sysmon\",\"providerGuid\":\"{5770385f-c22a-43e0-bf4c-06f5698ffbd9}\",\"eventID\":\"1\",\"version\":\"5\",\"level\":\"4\",\"task\":\"1\",\"opcode\":\"0\",\"keywords\":\"0x8000000000000000\",\"systemTime\":\"2025-03-03T15:58:38.9453365Z\",\"eventRecordID\":\"67\",\"processID\":\"2796\",\"threadID\":\"8740\",\"channel\":\"Microsoft-Windows-Sysmon/Operational\",\"computer\":\"DESKTOP-JR3H2QV\",\"severityValue\":\"INFORMATION\",\"message\":\"\\\"Process Create:\\r\\nRuleName: -\\r\\nUtcTime: 2025-03-03 15:58:38.942\\r\\nProcessGuid: {4f767b5e-d1ae-67c5-6b0b-000000000300}\\r\\nProcessId: 7292\\r\\nImage: C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\r\\nFileVersion: 10.0.19041.3996 (WinBuild.160101.0800)\\r\\nDescription: Windows PowerShell\\r\\nProduct: Microsoft® Windows® Operating System\\r\\nCompany: Microsoft Corporation\\r\\nOriginalFileName: PowerShell.EXE\\r\\nCommandLine: \\\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \\r\\nCurrentDirectory: C:\\\\Windows\\\\system32\\\\\\r\\nUser: DESKTOP-JR3H2QV\\\\windows\\r\\nLogonGuid: {4f767b5e-d073-67c5-c760-8e0200000000}\\r\\nLogonId: 0x28E60C7\\r\\nTerminalSessionId: 2\\r\\nIntegrityLevel: High\\r\\nHashes: MD5=2E5A8590CF6848968FC23DE3FA1E25F1\\r\\nParentProcessGuid: {4f767b5e-d074-67c5-cc0a-000000000300}\\r\\nParentProcessId: 5496\\r\\nParentImage: C:\\\\Windows\\\\explorer.exe\\r\\nParentCommandLine: C:\\\\Windows\\\\Explorer.EXE\\r\\nParentUser: DESKTOP-JR3H2QV\\\\windows\\\"\"},\"eventdata\":{\"utcTime\":\"2025-03-03 15:58:38.942\",\"processGuid\":\"{4f767b5e-d1ae-67c5-6b0b-000000000300}\",\"processId\":\"7292\",\"image\":\"C:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\WindowsPowerShell\\\\\\\\v1.0\\\\\\\\powershell.exe\",\"fileVersion\":\"10.0.19041.3996 (WinBuild.160101.0800)\",\"description\":\"Windows PowerShell\",\"product\":\"Microsoft® Windows® Operating System\",\"company\":\"Microsoft Corporation\",\"originalFileName\":\"PowerShell.EXE\",\"commandLine\":\"\\\\\\\"C:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\WindowsPowerShell\\\\\\\\v1.0\\\\\\\\powershell.exe\\\\\\\"\",\"currentDirectory\":\"C:\\\\\\\\Windows\\\\\\\\system32\\\\\\\\\",\"user\":\"DESKTOP-JR3H2QV\\\\\\\\windows\",\"logonGuid\":\"{4f767b5e-d073-67c5-c760-8e0200000000}\",\"logonId\":\"0x28e60c7\",\"terminalSessionId\":\"2\",\"integrityLevel\":\"High\",\"hashes\":\"MD5=2E5A8590CF6848968FC23DE3FA1E25F1\",\"parentProcessGuid\":\"{4f767b5e-d074-67c5-cc0a-000000000300}\",\"parentProcessId\":\"5496\",\"parentImage\":\"C:\\\\\\\\Windows\\\\\\\\explorer.exe\",\"parentCommandLine\":\"C:\\\\\\\\Windows\\\\\\\\Explorer.EXE\",\"parentUser\":\"DESKTOP-JR3H2QV\\\\\\\\windows\"}}}",
+    "timestamp": "2025-03-03T15:58:39.934+0000"
+  },
+  "fields": {
+    "timestamp": [
+      "2025-03-03T15:58:39.934Z"
+    ]
+  },
+  "highlight": {
+    "manager.name": [
+      "@opensearch-dashboards-highlighted-field@wazuh.manager@/opensearch-dashboards-highlighted-field@"
+    ]
+  },
+  "sort": [
+    1741017519934
+  ]
+}
