@@ -1,0 +1,55 @@
+{
+	"name": "socme",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@internationalized/date": "^3.7.0",
+		"@sveltejs/adapter-auto": "^4.0.0",
+		"@sveltejs/kit": "^2.17.1",
+		"@sveltejs/vite-plugin-svelte": "^5.0.3",
+		"@tailwindcss/forms": "^0.5.10",
+		"@tailwindcss/typography": "^0.5.16",
+		"@tailwindcss/vite": "^4.0.6",
+		"@types/chart.js": "^2.9.41",
+		"autoprefixer": "^10.4.20",
+		"bits-ui": "1.0.0-next.96",
+		"chart.js": "^4.4.8",
+		"clsx": "^2.1.1",
+		"embla-carousel-svelte": "^8.5.2",
+		"formsnap": "^2.0.0",
+		"lucide-svelte": "^0.475.0",
+		"mode-watcher": "^0.5.1",
+		"paneforge": "1.0.0-next.2",
+		"svelte": "^5.20.0",
+		"svelte-check": "^4.1.4",
+		"svelte-sonner": "^0.3.28",
+		"sveltekit-superforms": "^2.23.1",
+		"tailwind-merge": "^3.0.1",
+		"tailwind-variants": "^0.3.1",
+		"tailwindcss": "^3.4.17",
+		"tailwindcss-animate": "^1.0.7",
+		"typescript": "^5.7.3",
+		"vaul-svelte": "1.0.0-next.3",
+		"vite": "^6.1.0",
+		"zod": "^3.24.2"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild"
+		]
+	},
+	"dependencies": {
+		"@edde746/svelte-apexcharts": "^2.1.0",
+		"axios": "^1.8.1",
+		"pocketbase": "^0.25.1"
+	}
+}
