@@ -27,10 +27,10 @@
             class="hidden dark:block m-auto"
           />
           <img
-            src="/logo-black.png m-auto"
+            src="/logo-black.png"
             alt="logo"
             width="55"
-            class="block dark:hidden"
+            class="block dark:hidden m-auto"
           />
           <h1 class="text-3xl md:text-4xl font-semibold tracking-tight mb-0">
             Sign-in
