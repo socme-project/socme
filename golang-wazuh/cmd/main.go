@@ -20,10 +20,15 @@ func main() {
 		panic(err)
 	}
 
-	agents, err := wazuh.GetApiVersion()
+	apiVer, err := wazuh.GetApiVersion()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(agents)
+	fmt.Println(apiVer)
+	alerts, err := wazuh.GetAlerts()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(alerts)
 }
