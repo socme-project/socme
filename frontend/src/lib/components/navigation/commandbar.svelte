@@ -108,7 +108,6 @@
         <RefreshCw class="mr-2 size-4" />
         <span>Refresh session</span>
       </Command.LinkItem>
-      <!-- TODO: Change with the good url  -->
       <Command.LinkItem
         onSelect={() => (open = !open)}
         href="https://github.com/socme-project"
