@@ -1,31 +1,87 @@
 package model
 
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
+
 type Alert struct {
 	ID              uint   `gorm:"primaryKey"`
-	ClientName      string `json:"client_name"`      // Agent name
-	RuleLevel       int    `json:"rule_level"`       // Severity level
-	RuleDescription string `json:"rule_description"` // Description of the alert
+	ClientName      string `                  json:"client_name"`      // Agent name
+	RuleLevel       int    `                  json:"rule_level"`       // Severity level
+	RuleDescription string `                  json:"rule_description"` // Description of the alert
 	Timestamp       string // Event timestamp
 
 	RawJSON string `json:"raw_json"` // Full event data
-	//IntegrityLevel  string `json:"integrity_level"`
+	// IntegrityLevel  string `json:"integrity_level"`
 }
 
-func NewAlert(clientName, ruleDescription, timestamp, rawJSON string, ruleLevel int) Alert {
-	return Alert{
-
+func NewAlert(
+	db *gorm.DB,
+	clientName, ruleDescription, timestamp, rawJSON string,
+	ruleLevel int,
+) error {
+	alert := Alert{
 		ClientName:      clientName,
 		RuleLevel:       ruleLevel,
 		RuleDescription: ruleDescription,
 		Timestamp:       timestamp,
 		RawJSON:         rawJSON,
 	}
+
+	result := db.Create(&alert)
+	if result.Error != nil {
+		return fmt.Errorf("Error while creating the alert")
+	}
+
+	return nil
 }
 
-// getAll
-// getAlertsByClient
-// getAlertsByRuleLevel
-// getAlertsByFzf
+func GetAllAlerts(db *gorm.DB) []Alert {
+	var alerts []Alert
+	db.Find(&alerts)
 
-// getAllPaginated - perPage, page //filtre
-// return alerts, nb alertes total
+	return alerts
+}
+
+func GetAlertsByClient(db *gorm.DB, clientName string) ([]Alert, error) {
+	var alerts []Alert
+	db.Find(&alerts, "client_name = ?", clientName)
+	if len(alerts) == 0 {
+		return nil, fmt.Errorf("No alerts found for this client")
+	}
+
+	return alerts, nil
+}
+
+func GetAlertsByRuleLevel(db *gorm.DB, ruleLevel int) ([]Alert, error) {
+	var alerts []Alert
+	db.Find(&alerts, "rule_level = ?", ruleLevel)
+	if len(alerts) == 0 {
+		return nil, fmt.Errorf("No alerts found for this rule level")
+	}
+
+	return alerts, nil
+}
+
+func GetAlertsByFzf(db *gorm.DB, clientName, ruleDescription string) ([]Alert, error) { // TO TEST
+	var alerts []Alert
+	db.Find(&alerts, "client_name = ? AND rule_description = ?", clientName, ruleDescription)
+	if len(alerts) == 0 {
+		return nil, fmt.Errorf("No alerts found for this client and rule description")
+	}
+
+	return alerts, nil
+}
+
+func GetAllPagniatedAlerts(db *gorm.DB, perPage, page int) ([]Alert, int) {
+  var alerts []Alert
+  db.Limit(perPage).Offset(page * perPage).Find(&alerts)
+
+  var total int64
+  db.Model(&Alert{}).Count(&total)
+
+  return alerts, int(total)
+}
+
