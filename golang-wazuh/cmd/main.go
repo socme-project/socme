@@ -12,6 +12,12 @@ func main() {
 		Port:     "55000",
 		Username: "admin",
 		Password: "HMthisismys3cr3tP5ssword34a;",
+		Indexer: wazuhapi.Indexer{
+			Username: "admin",
+			Password: "HMthisismys3cr3tP5ssword34a;",
+			Host:     "10.8.178.20",
+			Port:     "9200",
+		},
 		Insecure: true,
 	}
 
@@ -24,11 +30,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	lastAlertId := "0"
 	fmt.Println(apiVer)
-	alerts, err := wazuh.GetAlerts()
+	alerts, err := wazuh.GetAlerts(lastAlertId)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(alerts)
+
+	// debug
+	fmt.Println(len(alerts))
 }
