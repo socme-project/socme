@@ -26,17 +26,13 @@ func main() {
 		panic(err)
 	}
 
-	apiVer, err := wazuh.GetApiVersion()
+	lastAlertId := 0
+	alerts, lastAlertId, err := wazuh.GetAlerts(lastAlertId)
 	if err != nil {
 		panic(err)
 	}
-	lastAlertId := "0"
-	fmt.Println(apiVer)
-	alerts, err := wazuh.GetAlerts(lastAlertId)
-	if err != nil {
-		panic(err)
-	}
-
+	// every 5 mins getAlerts lastAlertId
+	alerts, lastAlertId, err = wazuh.GetAlerts(lastAlertId)
 	// debug
 	fmt.Println(len(alerts))
 }
