@@ -5,7 +5,6 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import axios from "axios";
   import { toast } from "svelte-sonner";
-
   let name = $state("");
   let logo = $state("");
   let artemisIP = $state("");
