@@ -3,21 +3,25 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	wazuhapi "github.com/socme-project/wazuh-go"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"gorm.io/gorm"
 )
 
 type Backend struct {
-	Port   string
-	DbPath string
-	IsProd bool
-	Db     *gorm.DB
-	Router *gin.Engine
-	Oauth  Oauth
+	Port                   string
+	DbPath                 string
+	IsProd                 bool
+	AlertRetrievalInterval time.Duration
+	Wazuh                  *wazuhapi.WazuhAPI
+	Db                     *gorm.DB
+	Router                 *gin.Engine
+	Oauth                  Oauth
 }
 
 type Oauth struct {
@@ -80,4 +84,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Error while starting the server: ", err)
 	}
+
+	intervalStr := os.Getenv("ALERT_RETRIEVAL_INTERVAL")
+	interval, err := time.ParseDuration(intervalStr)
+	if err != nil {
+		interval = 10 * time.Second
+	}
+	backend.AlertRetrievalInterval = interval
 }
