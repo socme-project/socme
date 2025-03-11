@@ -30,17 +30,17 @@
   - [-] **Applications**
     - [-] Open-SOC Frontend (sveltekit)
     - [-] Open-SOC Backend (golang)
-      - [ ] Managing users
-      - [ ] Managing clients
+      - [X] Managing users
+      - [-] Managing clients
       - [ ] Managing alerts (cron)
-      - [-] Wazuh API
-        - [ ] Get alerts
+      - [X] Wazuh API
+        - [X] Get alerts
         - [x] Get agents
         - [x] Get status
         - [x] Get version
     - [ ] Open-SOC CLI (bash, on new tty, w/open-ops)
     - [ ] Open-Ops
-    - [ ] Status app
+    - [-] Status app
 - [ ] ***RUN***
   - [ ] Démarcher des clients
   - [ ] ...
