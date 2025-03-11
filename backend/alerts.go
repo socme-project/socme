@@ -1,0 +1,16 @@
+package main
+
+import (
+	"time"
+)
+
+func (b Backend) GetAlerts() {
+	for {
+
+		alerts = b.wazuh.GetAlerts(b.GetLastID())
+
+		db.AddAlerts(alerts)
+
+		time.Sleep(5 * time.Minute)
+	}
+}

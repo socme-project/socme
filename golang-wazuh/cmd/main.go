@@ -31,6 +31,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	//send alerts to the database
+
 	// every 5 mins getAlerts lastAlertId
 	alerts, lastAlertId, err = wazuh.GetAlerts(lastAlertId)
 	// debug

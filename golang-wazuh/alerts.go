@@ -9,10 +9,9 @@ import (
 )
 
 type Alert struct {
-	ID              uint
 	WazuhAlertID    string `json:"wazuh_alert_id"`
-	ClientName      string `json:"client_name"`
-	RuleLevel       int    `json:"rule_level"`
+	RuleID          string `json:"rule_id"`
+	RuleLevel       uint   `json:"rule_level"`
 	RuleDescription string `json:"rule_description"`
 	Timestamp       string `json:"timestamp"`
 	RawJSON         string `json:"raw_json"`
@@ -25,6 +24,7 @@ func (w *WazuhAPI) GetAlerts(lastAlertId int) (alerts []Alert, lastId int, err e
 				ID     string `json:"_id"`
 				Source struct {
 					Rule struct {
+						ID          string
 						Level       uint
 						Description string
 					}
@@ -92,7 +92,8 @@ func (w *WazuhAPI) GetAlerts(lastAlertId int) (alerts []Alert, lastId int, err e
 			}
 			alerts = append(alerts, Alert{
 				WazuhAlertID:    item.ID,
-				RuleLevel:       int(item.Source.Rule.Level),
+				RuleID:          item.Source.Rule.ID,
+				RuleLevel:       item.Source.Rule.Level,
 				RuleDescription: item.Source.Rule.Description,
 				Timestamp:       item.Source.Timestamp,
 				RawJSON:         string(raw),

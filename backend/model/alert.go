@@ -7,14 +7,15 @@ import (
 )
 
 type Alert struct {
-	ID              uint   `gorm:"primaryKey"`
-	ClientName      string `                  json:"client_name"`      // Agent name
-	RuleLevel       int    `                  json:"rule_level"`       // Severity level
-	RuleDescription string `                  json:"rule_description"` // Description of the alert
-	Timestamp       string // Event timestamp
+	ID         uint   `gorm:"primaryKey"`
+	ClientName string `json:"client_name"`
 
-	RawJSON string `json:"raw_json"` // Full event data
-	// IntegrityLevel  string `json:"integrity_level"`
+	WazuhAlertID    string `json:"wazuh_alert_id"`
+	RuleID          string `json:"rule_id"`
+	RuleLevel       uint   `json:"rule_level"`
+	RuleDescription string `json:"rule_description"`
+	Timestamp       string `json:"timestamp"`
+	RawJSON         string `json:"raw_json"`
 }
 
 func NewAlert(
@@ -24,7 +25,6 @@ func NewAlert(
 ) error {
 	alert := Alert{
 		ClientName:      clientName,
-		RuleLevel:       ruleLevel,
 		RuleDescription: ruleDescription,
 		Timestamp:       timestamp,
 		RawJSON:         rawJSON,
@@ -76,12 +76,11 @@ func GetAlertsByFzf(db *gorm.DB, clientName, ruleDescription string) ([]Alert, e
 }
 
 func GetAllPagniatedAlerts(db *gorm.DB, perPage, page int) ([]Alert, int) {
-  var alerts []Alert
-  db.Limit(perPage).Offset(page * perPage).Find(&alerts)
+	var alerts []Alert
+	db.Limit(perPage).Offset(page * perPage).Find(&alerts)
 
-  var total int64
-  db.Model(&Alert{}).Count(&total)
+	var total int64
+	db.Model(&Alert{}).Count(&total)
 
-  return alerts, int(total)
+	return alerts, int(total)
 }
-
