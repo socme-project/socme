@@ -1,40 +1,32 @@
 package headscale
 
 import (
-	"context"
-	"fmt"
-	"log/slog"
-	"os"
+	"time"
 
 	hsClient "github.com/hibare/headscale-client-go"
+	"golang.org/x/net/context"
 )
 
-type HeadscaleServer struct {
-	ServerUrl string
-	ApiToken  string
+type Server struct {
+	Server hsClient.HeadscaleClientInterface
 }
 
-func (HeadscaleServer) NewClient() {
-
+func ConnectServer(url, token string) (*Server, error) {
+	client, err := hsClient.NewClient(url, token, hsClient.HeadscaleClientOptions{})
+	return &Server{Server: client}, err
 }
 
-func main() {
-	slog.SetLogLoggerLevel(slog.LevelDebug) // Optional
-
-	serverUrl := os.Getenv("HS_SERVER_URL")
-	apiToken := os.Getenv("HS_API_TOKEN")
-
-	client, err := hsClient.NewClient(serverUrl, apiToken, hsClient.HeadscaleClientOptions{})
+func (s *Server) NewClient(name string) (preauthkey string, err error) {
+	client, err := s.Server.Users().Create(context.Background(), name)
 	if err != nil {
-		panic(err)
+		return "", err
+	}
+	keys, err := s.Server.PreAuthKeys().
+		Create(context.Background(), client.Name, true, false, time.Now().Add(24*time.Hour), []string{"client"})
+
+	if len(keys.PreAuthKey) == 0 {
+		return "", err
 	}
 
-	nodes, err := client.Nodes().List(context.Background())
-	if err != nil {
-		panic(err)
-	}
-
-	for _, node := range nodes.Nodes {
-		fmt.Printf("Node: %s\n", node.Name)
-	}
+	return keys.PreAuthKey[0].Key, err
 }
