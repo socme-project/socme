@@ -1,13 +1,16 @@
 package wazuhapi
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 )
 
 type Alert struct {
-	ID              uint   `json:"id"`
+	ID              uint
+	WazuhAlertID    string `json:"wazuh_alert_id"`
 	ClientName      string `json:"client_name"`
 	RuleLevel       int    `json:"rule_level"`
 	RuleDescription string `json:"rule_description"`
@@ -15,39 +18,94 @@ type Alert struct {
 	RawJSON         string `json:"raw_json"`
 }
 
-func (w *WazuhAPI) GetAlerts() ([]Alert, error) {
-	resp, err := http.Get(
-		"https://10.8.178.20:9200/wazuh-alerts-*/_search/?size=10000",
-	)
-	if err != nil {
-		return nil, err
-	}
-
+func (w *WazuhAPI) GetAlerts(lastAlertId int) (alerts []Alert, lastId int, err error) {
 	type Response struct {
-		Data struct {
-			Items []map[string]interface{} `json:"items"`
-		} `json:"data"`
+		Hits struct {
+			Hits []struct {
+				ID     string `json:"_id"`
+				Source struct {
+					Rule struct {
+						Level       uint
+						Description string
+					}
+					Data struct {
+						Description string
+					}
+					Timestamp string
+				} `json:"_source"`
+				Sort []int
+			}
+		}
 	}
 
-	var response Response
-	err = json.Unmarshal(resp, &response) // cannot use resp
-	if err != nil {
-		return nil, fmt.Errorf("Error while parsing alerts: %v", err)
-	}
+	alerts = []Alert{}
 
-	alerts := make([]Alert, 0, len(response.Data.Items))
-	for _, item := range response.Data.Items {
-		rawJSON, err := json.Marshal(item)
+	for {
+		var query string
+		if lastAlertId != 0 {
+			query = `{ "size": 500, "sort": [ { "timestamp": { "order": "asc" } } ], "search_after": [` + strconv.Itoa(
+				lastAlertId,
+			) + `]}`
+		} else {
+			query = `{ "size": 500, "sort": [ { "timestamp": { "order": "asc" } } ] }`
+		}
+		req, err := http.NewRequest(
+			"GET",
+			"https://"+w.Indexer.Host+":"+w.Indexer.Port+"/wazuh-alerts-*/_search/",
+			bytes.NewBuffer([]byte(query)),
+		)
 		if err != nil {
-			continue
+			return nil, lastAlertId, err
 		}
 
-		alert := Alert{
-			RawJSON: string(rawJSON),
+		req.SetBasicAuth(w.Indexer.Username, w.Indexer.Password)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, lastAlertId, err
 		}
 
-		alerts = append(alerts, alert)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, lastAlertId, err
+		}
+
+		var response Response
+
+		err = json.Unmarshal(body, &response)
+		if err != nil {
+			return nil, lastAlertId, err
+		}
+
+		for _, item := range response.Hits.Hits {
+			raw, err := json.Marshal(item)
+			if err != nil {
+				return nil, lastAlertId, err
+			}
+
+			if item.Source.Rule.Description == "" {
+				if item.Source.Data.Description == "" {
+					item.Source.Rule.Description = "No title and description available"
+				}
+				item.Source.Rule.Description = item.Source.Data.Description
+			}
+			alerts = append(alerts, Alert{
+				WazuhAlertID:    item.ID,
+				RuleLevel:       int(item.Source.Rule.Level),
+				RuleDescription: item.Source.Rule.Description,
+				Timestamp:       item.Source.Timestamp,
+				RawJSON:         string(raw),
+			})
+
+		}
+		if len(response.Hits.Hits) == 0 {
+			return alerts, lastAlertId, nil
+		}
+		lastAlertId = response.Hits.Hits[len(response.Hits.Hits)-1].Sort[0]
+
+		if len(response.Hits.Hits) < 500 {
+			return alerts, lastAlertId, nil
+		}
 	}
-	fmt.Println("A:", alerts, ":A")
-	return alerts, nil
 }
