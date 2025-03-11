@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	// "github.com/socme-project/certfrscrapping"
+	certfr_scrapping "github.com/socme-project/cert-fr-scrapping"
 )
 
 func (b *Backend) UserRoutes() {
@@ -24,10 +24,10 @@ func (b *Backend) UserRoutes() {
 	})
 
 	b.Router.GET("/certfr", b.userMiddleware, func(c *gin.Context) {
-		// alerts := certfrscrapping.CollectAlert()
-		// cti := certfrscrapping.CollectCti()
-		// avis := certfrscrapping.CollectAvis()
-		// c.JSON(http.StatusOK, gin.H{"alerts": alerts, "cti": cti, "avis": avis})
+		alerts := certfr_scrapping.CollectAlert()
+		cti := certfr_scrapping.CollectCti()
+		avis := certfr_scrapping.CollectAvis()
+		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "cti": cti, "avis": avis})
 	})
 
 	b.Router.GET("/user/change-role", b.adminMiddleware, func(c *gin.Context) {
