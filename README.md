@@ -1,4 +1,4 @@
-# OPEN-SOC
+# SOCme
 
 - [Roadmap](./ROADMAP.md)
 
