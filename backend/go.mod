@@ -7,6 +7,7 @@ require (
 	github.com/hibare/headscale-client-go v0.1.1-0.20250222111302-3e52b94d7d4c
 	github.com/joho/godotenv v1.5.1
 	github.com/socme-project/cert-fr-scrapping v0.0.0-20250311143456-90427564d69e
+	github.com/socme-project/wazuh-go v0.0.0-20250311130311-e17d5f9105b0
 	golang.org/x/net v0.37.0
 	golang.org/x/oauth2 v0.27.0
 	gorm.io/driver/sqlite v1.5.7
@@ -46,7 +47,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
-	github.com/socme-project/wazuh-go v0.0.0-20250311130311-e17d5f9105b0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
