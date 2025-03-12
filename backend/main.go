@@ -37,10 +37,12 @@ func main() {
 		log.Println("Error loading .env file in the root folder: ", err)
 	}
 
+	interval, _ := time.ParseDuration(os.Getenv("ALERT_RETRIEVAL_INTERVAL"))
 	backend := Backend{
-		DbPath: os.Getenv("DB_PATH"),
-		Port:   os.Getenv("BACKEND_PORT"),
-		IsProd: os.Getenv("IS_PROD") == "true",
+		DbPath:                 os.Getenv("DB_PATH"),
+		Port:                   os.Getenv("BACKEND_PORT"),
+		IsProd:                 os.Getenv("IS_PROD") == "true",
+		AlertRetrievalInterval: interval,
 		Oauth: Oauth{
 			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
 			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
@@ -65,6 +67,10 @@ func main() {
 		backend.Port = "8080"
 	}
 
+	if backend.AlertRetrievalInterval == 0 {
+		backend.AlertRetrievalInterval = 5 * time.Minute
+	}
+
 	err = backend.initDB()
 	if err != nil {
 		log.Fatal("Error while initializing the database: ", err)
@@ -79,16 +85,10 @@ func main() {
 	backend.UserRoutes()
 	backend.ClientRoutes()
 
+	// Starting infinite loop to retrieve alerts from Wazuh API
 	log.Println("Server is launched at http://localhost:" + backend.Port)
 	err = backend.Router.Run(":" + backend.Port)
 	if err != nil {
 		log.Fatal("Error while starting the server: ", err)
 	}
-
-	intervalStr := os.Getenv("ALERT_RETRIEVAL_INTERVAL")
-	interval, err := time.ParseDuration(intervalStr)
-	if err != nil {
-		interval = 10 * time.Second
-	}
-	backend.AlertRetrievalInterval = interval
 }

@@ -10,21 +10,26 @@ type Alert struct {
 	ID         uint   `gorm:"primaryKey"`
 	ClientName string `json:"client_name"`
 
-	WazuhAlertID    string `json:"wazuh_alert_id"`
-	RuleID          string `json:"rule_id"`
-	RuleLevel       uint   `json:"rule_level"`
-	RuleDescription string `json:"rule_description"`
-	Timestamp       string `json:"timestamp"`
-	RawJSON         string `json:"raw_json"`
+	WazuhAlertID    string   `json:"wazuh_alert_id"`
+	RuleID          string   `json:"rule_id"`
+	RuleLevel       uint     `json:"rule_level"`
+	RuleDescription string   `json:"rule_description"`
+	Timestamp       string   `json:"timestamp"`
+	RawJSON         string   `json:"raw_json"`
+	Tags            []string `json:"tags"`
 }
 
 func NewAlert(
 	db *gorm.DB,
-	clientName, ruleDescription, timestamp, rawJSON string,
-	ruleLevel int,
+	wazuhAlertID, ruleID, ruleDescription, timestamp, rawJSON string,
+	ruleLevel uint,
 ) error {
 	alert := Alert{
-		ClientName:      clientName,
+		// ClientName:      clientName,
+
+		WazuhAlertID:    wazuhAlertID,
+		RuleID:          ruleID,
+		RuleLevel:       ruleLevel,
 		RuleDescription: ruleDescription,
 		Timestamp:       timestamp,
 		RawJSON:         rawJSON,
