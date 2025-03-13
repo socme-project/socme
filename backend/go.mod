@@ -7,7 +7,7 @@ require (
 	github.com/hibare/headscale-client-go v0.1.1-0.20250222111302-3e52b94d7d4c
 	github.com/joho/godotenv v1.5.1
 	github.com/socme-project/cert-fr-scrapping v0.0.0-20250311143456-90427564d69e
-	github.com/socme-project/wazuh-go v0.0.0-20250311130311-e17d5f9105b0
+	github.com/socme-project/wazuh-go v0.1.0
 	golang.org/x/net v0.37.0
 	golang.org/x/oauth2 v0.27.0
 	gorm.io/driver/sqlite v1.5.7

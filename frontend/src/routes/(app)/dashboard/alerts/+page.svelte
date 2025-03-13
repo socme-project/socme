@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    ChevronLastIcon,
     FileQuestionIcon,
     ShieldAlert,
     TouchpadOffIcon,
@@ -11,21 +12,41 @@
   import Filters from "./filters.svelte";
   import FiltersSingle from "./filtersSingle.svelte";
   import Input from "$lib/components/ui/input/input.svelte";
+  import { onMount } from "svelte";
+  import axios from "axios";
+  import { toast } from "svelte-sonner";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import { Next, Previous } from "$lib/components/ui/carousel";
 
   let currentPage = $state(1);
 
   let perPage = $state(10);
-  let count = $state(100);
+  let maxPage = $state(1);
 
-  let alerts: Alert[] = [
-    {
-      id: 1,
-      title: "Alert 1",
-      severity: "high",
-      client: "esiea",
-      timestamp: "2021-10-01T12:00:00Z",
-    },
-  ];
+  let alerts: Alert[] = $state([]);
+
+  $effect(async () => {
+    await axios
+      .get("/api/alerts/page", {
+        headers: { Authorization: localStorage.getItem("token") },
+        params: { page: currentPage, perPage: perPage },
+      })
+      .then((res) => {
+        alerts = res.data.alerts.map((alert: any) => ({
+          id: alert.ID,
+          title: alert.rule_description,
+          severity: alert.rule_level,
+          client: alert.client_name,
+          timestamp: alert.timestamp,
+          raw: alert.raw_json,
+        }));
+        maxPage = res.data.maxPage;
+        console.log(res.data);
+      })
+      .catch(() => {
+        toast.error("Internal server error");
+      });
+  });
 
   export const statuses = [
     {
@@ -66,35 +87,40 @@
 
 <DataTable data={alerts} {columns} />
 
-<Pagination.Root
-  {count}
-  {perPage}
-  class="mt-6"
-  onPageChange={(p) => {
-    currentPage = p;
-  }}
->
-  {#snippet children({ pages, currentPage })}
-    <Pagination.Content>
-      <Pagination.Item>
-        <Pagination.PrevButton />
-      </Pagination.Item>
-      {#each pages as page (page.key)}
-        {#if page.type === "ellipsis"}
-          <Pagination.Item>
-            <Pagination.Ellipsis />
-          </Pagination.Item>
-        {:else}
-          <Pagination.Item>
-            <Pagination.Link {page} isActive={currentPage === page.value}>
-              {page.value}
-            </Pagination.Link>
-          </Pagination.Item>
-        {/if}
-      {/each}
-      <Pagination.Item>
-        <Pagination.NextButton />
-      </Pagination.Item>
-    </Pagination.Content>
-  {/snippet}
-</Pagination.Root>
+<div class="flex justify-between gap-4 flex-wrap">
+  <p>
+    Page {currentPage} of {maxPage}
+  </p>
+  <div>
+    <Button
+      variant="ghost"
+      disabled={currentPage === 1}
+      onclick={() => (currentPage = 1)}
+    >
+      First
+    </Button>
+    <Button
+      variant="ghost"
+      disabled={currentPage === 1}
+      onclick={() => (currentPage -= 1)}
+    >
+      Previous
+    </Button>
+
+    <Button
+      variant="ghost"
+      disabled={currentPage === maxPage}
+      onclick={() => (currentPage += 1)}
+    >
+      Next
+    </Button>
+
+    <Button
+      variant="ghost"
+      disabled={currentPage === maxPage}
+      onclick={() => (currentPage = maxPage)}
+    >
+      Last
+    </Button>
+  </div>
+</div>

@@ -48,6 +48,19 @@ func main() {
 			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 			RedirectURL:  os.Getenv("GITHUB_REDIRECT_URL"),
 		},
+		Wazuh: &wazuhapi.WazuhAPI{
+			Host:     "10.8.178.20",
+			Port:     "55000",
+			Username: "admin",
+			Password: "HMthisismys3cr3tP5ssword34a;",
+			Indexer: wazuhapi.Indexer{
+				Username: "admin",
+				Password: "HMthisismys3cr3tP5ssword34a;",
+				Host:     "10.8.178.20",
+				Port:     "9200",
+			},
+			Insecure: true,
+		},
 	}
 
 	backend.Oauth.Cfg = &oauth2.Config{
@@ -84,6 +97,10 @@ func main() {
 	backend.AuthRoutes()
 	backend.UserRoutes()
 	backend.ClientRoutes()
+	backend.AlertRoutes()
+
+	log.Println("Starting UpdateAlerts loop")
+	go backend.UpdateAlerts()
 
 	// Starting infinite loop to retrieve alerts from Wazuh API
 	log.Println("Server is launched at http://localhost:" + backend.Port)
