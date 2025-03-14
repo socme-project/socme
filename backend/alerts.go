@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	wazuhapi "github.com/socme-project/wazuh-go"
-	"gorm.io/gorm"
 )
 
 func (b *Backend) AlertRoutes() {
@@ -142,21 +141,18 @@ func (b Backend) SearchAlert(
 
 	// Filter by severity as string
 	if len(filter.Severity) > 0 {
-		query = query.Where(func(db *gorm.DB) *gorm.DB {
-			for _, severity := range filter.Severity {
-				switch severity {
-				case "low":
-					db = db.Or("rule_level <= ?", 6)
-				case "medium":
-					db = db.Or("rule_level >= ? AND rule_level <= ?", 7, 11)
-				case "high":
-					db = db.Or("rule_level >= ? AND rule_level <= ?", 12, 14)
-				case "critical":
-					db = db.Or("rule_level >= ?", 15)
-				}
+		for _, severity := range filter.Severity {
+			switch severity {
+			case "low":
+				query = query.Or("rule_level <= ?", 6)
+			case "medium":
+				query = query.Or("rule_level >= ? AND rule_level <= ?", 7, 11)
+			case "high":
+				query = query.Or("rule_level >= ? AND rule_level <= ?", 12, 14)
+			case "critical":
+				query = query.Or("rule_level >= ?", 15)
 			}
-			return db
-		})
+		}
 	}
 
 	// if len(filter.RuleID) > 0 {
