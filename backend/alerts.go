@@ -31,7 +31,7 @@ func (b *Backend) AlertRoutes() {
 		b.Db.Model(&model.Alert{}).Count(&totalNumberOfPages)
 		totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
 
-		alerts, err := b.SearchAlert("", filter, perPage, page)
+		alerts, totalNumberOfPages, err := b.SearchAlert("", filter, perPage, page)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve alerts"})
 		}
@@ -127,7 +127,7 @@ func (b Backend) SearchAlert(
 	input string,
 	filter Filter,
 	perPage, page int,
-) ([]model.Alert, error) {
+) ([]model.Alert, int64, error) {
 	var alerts []model.Alert
 	query := b.Db.Model(&model.Alert{}).Order("timestamp DESC")
 
@@ -169,11 +169,14 @@ func (b Backend) SearchAlert(
 	// 	}
 	// }
 
+  var totalNumberOfPages int64 = 0
+  query.Count(&totalNumberOfPages)
+  totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
 	if err := query.Limit(perPage).Offset((page - 1) * perPage).Find(&alerts).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return alerts, nil
+	return alerts, totalNumberOfPages, nil
 }
 
 // func (b Backend) SearchPaginated() {
