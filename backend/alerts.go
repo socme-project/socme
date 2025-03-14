@@ -2,9 +2,9 @@ package main
 
 import (
 	"backend/model"
-	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -188,26 +188,25 @@ func (b Backend) SearchAlert(
 			var alert model.Alert
 			_ = b.Db.ScanRows(rows, &alert)
 			rank := fuzzy.RankMatchNormalizedFold(search, alert.RuleDescription)
-			fmt.Println("Description:", alert.RuleDescription, "Rank:", rank)
 			if rank >= 0 {
 				alertsRank = append(alertsRank, AlertRank{alert, rank})
 			}
 		}
 		// sort by rank then put in alerts
-		// if len(alertsRank) > 0 {
-		// sort.Slice(alertsRank[:], func(i, j int) bool {
-		// 	return alertsRank[i].rank > alertsRank[j].rank
-		// })
-		// }
+		if len(alertsRank) > 0 {
+			sort.Slice(alertsRank[:], func(i, j int) bool {
+				return alertsRank[i].rank < alertsRank[j].rank
+			})
+		} else {
+			return []model.Alert{}, 0, nil
+		}
 		for _, alertRank := range alertsRank {
 			alerts = append(alerts, alertRank.alert)
 		}
+		totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
 		if len(alerts) > perPage {
 			alerts = alerts[(page-1)*perPage : page*perPage]
 		}
-
-		totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
-
 	}
 
 	return alerts, totalNumberOfPages, nil
