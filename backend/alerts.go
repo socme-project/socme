@@ -51,6 +51,35 @@ func (b *Backend) AlertRoutes() {
 		b.Db.First(&alert, id)
 		c.JSON(http.StatusOK, gin.H{"alert": alert, "message": "Alert retrieved"})
 	})
+
+	b.Router.POST("/alerts/getlastfive", b.userMiddleware, func(c *gin.Context) {
+		alerts := []model.Alert{}
+		b.Db.Order("timestamp DESC").Limit(5).Find(&alerts)
+		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last five alerts retrieved"})
+	})
+
+	b.Router.POST("/alerts/last24h/:severity", b.userMiddleware, func(c *gin.Context) {
+		severity := c.Param("severity")
+		alerts := []model.Alert{}
+		query := b.Db.Model(&model.Alert{})
+		switch severity {
+		case "low":
+			query = query.Or("rule_level <= ?", 6)
+		case "medium":
+			query = query.Or("rule_level >= ? AND rule_level <= ?", 7, 11)
+		case "high":
+			query = query.Or("rule_level >= ? AND rule_level <= ?", 12, 14)
+		case "critical":
+			query = query.Or("rule_level >= ?", 15)
+		}
+		// array of 12 length, 0 is the oldest... to display in dashboard, medium has its own bars, high has its own bars, etc
+		for i := 0; i < 12; i++ {
+			var alertsInHour []model.Alert
+			query.Where("timestamp BETWEEN ? AND ?", time.Now().Add(-time.Hour*time.Duration(i+1)), time.Now().Add(-time.Hour*time.Duration(i))).
+				Find(&alertsInHour)
+			alerts = append(alerts, alertsInHour...)
+		}
+	})
 }
 
 func (b Backend) UpdateAlerts() {
