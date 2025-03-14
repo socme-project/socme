@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,11 +23,20 @@ func (b *Backend) AlertRoutes() {
 	b.Router.GET("/alerts/page", b.userMiddleware, func(c *gin.Context) {
 		perPage, _ := strconv.Atoi(c.Query("perPage"))
 		page, _ := strconv.Atoi(c.Query("page"))
-		alerts := []model.Alert{}
+		severity, _ := c.GetQuery("severity")
+		filter := Filter{
+			Severity: strings.Split(severity, ","), // split by comma
+
+		}
 		var totalNumberOfPages int64 = 0
 		b.Db.Model(&model.Alert{}).Count(&totalNumberOfPages)
 		totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
-		b.Db.Order("timestamp DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&alerts)
+
+		alerts, err := b.SearchAlert("", filter, perPage, page)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve alerts"})
+		}
+
 		c.JSON(
 			http.StatusOK,
 			gin.H{"alerts": alerts, "maxPage": totalNumberOfPages, "message": "Page retrieved"},
@@ -114,9 +124,13 @@ type Filter struct {
 
 // dorks -> ruleid rulelevel description(no need cause already implied)
 // search by rule description first, cf https://github.com/lithammer/fuzzysearch
-func (b Backend) SearchAlert(input string, filter Filter) ([]model.Alert, error) {
+func (b Backend) SearchAlert(
+	input string,
+	filter Filter,
+	perPage, page int,
+) ([]model.Alert, error) {
 	var alerts []model.Alert
-	query := b.Db.Model(&model.Alert{})
+	query := b.Db.Model(&model.Alert{}).Order("timestamp DESC")
 
 	// if input != "" { // only for fzf
 	// 	query = query.Where(
@@ -159,7 +173,7 @@ func (b Backend) SearchAlert(input string, filter Filter) ([]model.Alert, error)
 	// 	}
 	// }
 
-	if err := query.Find(&alerts).Error; err != nil {
+	if err := query.Limit(perPage).Offset((page - 1) * perPage).Find(&alerts).Error; err != nil {
 		return nil, err
 	}
 
