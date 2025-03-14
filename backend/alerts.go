@@ -45,13 +45,6 @@ func (b *Backend) AlertRoutes() {
 		)
 	})
 
-	b.Router.GET("/alerts/:id", b.userMiddleware, func(c *gin.Context) {
-		id := c.Param("id")
-		alert := model.Alert{}
-		b.Db.First(&alert, id)
-		c.JSON(http.StatusOK, gin.H{"alert": alert, "message": "Alert retrieved"})
-	})
-
 	b.Router.POST("/alerts/getlastfive", b.userMiddleware, func(c *gin.Context) {
 		alerts := []model.Alert{}
 		b.Db.Order("timestamp DESC").Limit(5).Find(&alerts)
@@ -79,6 +72,13 @@ func (b *Backend) AlertRoutes() {
 				Find(&alertsInHour)
 			alerts = append(alerts, alertsInHour...)
 		}
+		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last 24h alerts retrieved"})
+	})
+	b.Router.GET("/alerts/:id", b.userMiddleware, func(c *gin.Context) {
+		id := c.Param("id")
+		alert := model.Alert{}
+		b.Db.First(&alert, id)
+		c.JSON(http.StatusOK, gin.H{"alert": alert, "message": "Alert retrieved"})
 	})
 }
 
