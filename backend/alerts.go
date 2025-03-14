@@ -74,7 +74,7 @@ func (b *Backend) AlertRoutes() {
 		}
 		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last 24h alerts retrieved"})
 	})
-	b.Router.GET("/alerts/:id", b.userMiddleware, func(c *gin.Context) {
+	b.Router.GET("/alerts/id/:id", b.userMiddleware, func(c *gin.Context) {
 		id := c.Param("id")
 		alert := model.Alert{}
 		b.Db.First(&alert, id)
