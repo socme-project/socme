@@ -45,13 +45,13 @@ func (b *Backend) AlertRoutes() {
 		)
 	})
 
-	b.Router.POST("/alerts/getlastfive", b.userMiddleware, func(c *gin.Context) {
+	b.Router.GET("/alerts/getlastfive", b.userMiddleware, func(c *gin.Context) {
 		alerts := []model.Alert{}
 		b.Db.Order("timestamp DESC").Limit(5).Find(&alerts)
 		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last five alerts retrieved"})
 	})
 
-	b.Router.POST("/alerts/last24h/:severity", b.userMiddleware, func(c *gin.Context) {
+	b.Router.GET("/alerts/last24h/:severity", b.userMiddleware, func(c *gin.Context) {
 		severity := c.Param("severity")
 		alerts := []model.Alert{}
 		query := b.Db.Model(&model.Alert{})
