@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/hibare/headscale-client-go v0.1.1-0.20250222111302-3e52b94d7d4c
 	github.com/joho/godotenv v1.5.1
+	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/socme-project/cert-fr-scrapping v0.0.0-20250311143456-90427564d69e
 	github.com/socme-project/wazuh-go v0.1.0
 	golang.org/x/net v0.37.0

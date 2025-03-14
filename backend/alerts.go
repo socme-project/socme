@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lithammer/fuzzysearch/fuzzy"
 	wazuhapi "github.com/socme-project/wazuh-go"
 )
 
@@ -23,6 +24,7 @@ func (b *Backend) AlertRoutes() {
 		perPage, _ := strconv.Atoi(c.Query("perPage"))
 		page, _ := strconv.Atoi(c.Query("page"))
 		severity, _ := c.GetQuery("severity")
+		search, _ := c.GetQuery("search")
 		filter := Filter{
 			Severity: strings.Split(severity, ","), // split by comma
 
@@ -31,7 +33,7 @@ func (b *Backend) AlertRoutes() {
 		b.Db.Model(&model.Alert{}).Count(&totalNumberOfPages)
 		totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
 
-		alerts, totalNumberOfPages, err := b.SearchAlert("", filter, perPage, page)
+		alerts, totalNumberOfPages, err := b.SearchAlert(search, filter, perPage, page)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve alerts"})
 		}
@@ -124,20 +126,12 @@ type Filter struct {
 // dorks -> ruleid rulelevel description(no need cause already implied)
 // search by rule description first, cf https://github.com/lithammer/fuzzysearch
 func (b Backend) SearchAlert(
-	input string,
+	search string,
 	filter Filter,
 	perPage, page int,
 ) ([]model.Alert, int64, error) {
 	var alerts []model.Alert
 	query := b.Db.Model(&model.Alert{}).Order("timestamp DESC")
-
-	// if input != "" { // only for fzf
-	// 	query = query.Where(
-	// 		"rule_description ILIKE ? OR raw_json ILIKE ?",
-	// 		"%"+input+"%",
-	// 		"%"+input+"%",
-	// 	)
-	// }
 
 	// Filter by severity as string
 	if len(filter.Severity) > 0 {
@@ -169,11 +163,31 @@ func (b Backend) SearchAlert(
 	// 	}
 	// }
 
-  var totalNumberOfPages int64 = 0
-  query.Count(&totalNumberOfPages)
-  totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
-	if err := query.Limit(perPage).Offset((page - 1) * perPage).Find(&alerts).Error; err != nil {
-		return nil, 0, err
+	var totalNumberOfPages int64 = 0
+	if search == "" {
+		query.Count(&totalNumberOfPages)
+		totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
+		if err := query.Limit(perPage).Offset((page - 1) * perPage).Find(&alerts).Error; err != nil {
+			return nil, 0, err
+		}
+	} else {
+		rows, err := query.Rows()
+		if err != nil {
+			return nil, 0, err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var alert model.Alert
+			_ = b.Db.ScanRows(rows, &alert)
+			if fuzzy.MatchNormalizedFold(search, alert.RuleDescription) {
+				alerts = append(alerts, alert)
+			}
+		}
+		totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
+
+		// totalNumberOfPages =
+		// alerts
 	}
 
 	return alerts, totalNumberOfPages, nil
