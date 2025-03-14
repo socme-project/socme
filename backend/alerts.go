@@ -66,13 +66,23 @@ func (b *Backend) AlertRoutes() {
 			query = query.Or("rule_level >= ?", 15)
 		}
 		// array of 12 length, 0 is the oldest... to display in dashboard, medium has its own bars, high has its own bars, etc
+		// for i := 0; i < 12; i++ {
+		// 	var alertsInHour []model.Alert
+		// 	query.Where("timestamp BETWEEN ? AND ?", time.Now().Add(-time.Hour*time.Duration(i+1)), time.Now().Add(-time.Hour*time.Duration(i))).
+		// 		Find(&alertsInHour)
+		// }
+
+		var numberOfEventsInLast24h []int // By range of 2 hours, so len = 12
 		for i := 0; i < 12; i++ {
 			var alertsInHour []model.Alert
 			query.Where("timestamp BETWEEN ? AND ?", time.Now().Add(-time.Hour*time.Duration(i+1)), time.Now().Add(-time.Hour*time.Duration(i))).
 				Find(&alertsInHour)
-			alerts = append(alerts, alertsInHour...)
+			numberOfEventsInLast24h = append(numberOfEventsInLast24h, len(alertsInHour))
 		}
-		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last 24h alerts retrieved"})
+		c.JSON(
+			http.StatusOK,
+			gin.H{"alerts": numberOfEventsInLast24h, "message": "Last 24h alerts retrieved"},
+		)
 	})
 	b.Router.GET("/alerts/id/:id", b.userMiddleware, func(c *gin.Context) {
 		id := c.Param("id")
