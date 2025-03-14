@@ -187,7 +187,7 @@ func (b Backend) SearchAlert(
 		for rows.Next() {
 			var alert model.Alert
 			_ = b.Db.ScanRows(rows, &alert)
-			rank := fuzzy.RankMatchNormalizedFold(alert.RuleDescription, search)
+			rank := fuzzy.RankMatchNormalizedFold(search, alert.RuleDescription)
 			if rank >= 0 {
 				alertsRank = append(alertsRank, AlertRank{alert, rank})
 			}
