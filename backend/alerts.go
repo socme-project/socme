@@ -201,7 +201,10 @@ func (b Backend) SearchAlert(
 		for _, alertRank := range alertsRank {
 			alerts = append(alerts, alertRank.alert)
 		}
-		alerts = alerts[(page-1)*perPage : page*perPage]
+		if len(alerts) > perPage {
+			alerts = alerts[(page-1)*perPage : page*perPage]
+		}
+
 		totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
 
 	}
