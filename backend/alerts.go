@@ -3,43 +3,80 @@ package main
 import (
 	"backend/model"
 	"log"
+	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	wazuhapi "github.com/socme-project/wazuh-go"
 	"gorm.io/gorm"
 )
 
+func (b *Backend) AlertRoutes() {
+	b.Router.GET("/alerts/all", b.userMiddleware, func(c *gin.Context) {
+		alerts := []model.Alert{}
+		b.Db.Order("timestamp DESC").Find(&alerts)
+		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "All alerts retrieved"})
+	})
+
+	b.Router.GET("/alerts/page", b.userMiddleware, func(c *gin.Context) {
+		perPage, _ := strconv.Atoi(c.Query("perPage"))
+		page, _ := strconv.Atoi(c.Query("page"))
+		alerts := []model.Alert{}
+		var totalNumberOfPages int64 = 0
+		b.Db.Model(&model.Alert{}).Count(&totalNumberOfPages)
+		totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
+		b.Db.Order("timestamp DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&alerts)
+		c.JSON(
+			http.StatusOK,
+			gin.H{"alerts": alerts, "maxPage": totalNumberOfPages, "message": "Page retrieved"},
+		)
+	})
+
+	b.Router.GET("/alerts/:id", b.userMiddleware, func(c *gin.Context) {
+		id := c.Param("id")
+		alert := model.Alert{}
+		b.Db.First(&alert, id)
+		c.JSON(http.StatusOK, gin.H{"alert": alert, "message": "Alert retrieved"})
+	})
+}
+
 func (b Backend) UpdateAlerts() {
-	go func() {
-		lastID, err := b.GetLastAlertIdFromDb()
+	lastID, err := b.GetLastAlertIdFromDb()
+	if err != nil && err.Error() == "record not found" {
+		lastID = 0
+	} else if err != nil {
+		log.Println("Failed to retrieve last alert ID from db:", err)
+	}
+
+	err = b.Wazuh.RefreshToken()
+	if err != nil {
+		log.Fatal("Failed to refresh token:", err)
+	}
+
+	for {
+		alerts, newLastID, err := b.Wazuh.GetAlerts(lastID)
 		if err != nil {
-			log.Println("Failed to retrieve last alert ID from db:", err)
+			log.Println("Failed to retrieve alerts:", err)
 		}
-		for {
-			alerts, newLastID, err := b.Wazuh.GetAlerts(lastID)
+		if len(alerts) > 0 {
+			err := b.AddAlertToDb(alerts)
 			if err != nil {
-				log.Println("Failed to retrieve alerts:", err)
+				log.Println("Failed to add alerts to db:", err)
 			}
-			if len(alerts) > 0 {
-				err := b.AddAlertToDb(alerts)
-				if err != nil {
-					log.Println("Failed to add alerts to db:", err)
-				}
-			}
-			lastID = newLastID
-			time.Sleep(b.AlertRetrievalInterval)
 		}
-	}()
+		lastID = newLastID
+		time.Sleep(b.AlertRetrievalInterval)
+	}
 }
 
 func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
+	layout := "2006-01-02T15:04:05.000-0700"
 	for _, alert := range alerts {
-		timestamp, err := time.Parse(time.RFC3339, alert.Timestamp)
+		timestamp, err := time.Parse(layout, alert.Timestamp)
 		if err != nil {
 			return err
 		}
-		alert.Timestamp = timestamp.Format(time.RFC3339)
 		// TODO: check if we need to RFC3339, or if there is another universal default format
 
 		err = model.NewAlert(
@@ -47,8 +84,9 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
 			alert.WazuhAlertID,
 			alert.RuleID,
 			alert.RuleDescription,
-			alert.Timestamp,
 			alert.RawJSON,
+			alert.Sort,
+			timestamp,
 			alert.RuleLevel,
 		)
 		if err != nil {
@@ -64,14 +102,14 @@ func (b Backend) GetLastAlertIdFromDb() (lastID int, err error) {
 	if result.Error != nil {
 		return 0, result.Error
 	}
-	return strconv.Atoi(alert.WazuhAlertID)
+	return alert.Sort, nil
 }
 
 type Filter struct {
 	Severity   []string
 	RuleID     []string
 	ClientName []string
-	Tags       []string
+	Tags       string
 }
 
 // dorks -> ruleid rulelevel description(no need cause already implied)

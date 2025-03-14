@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -10,18 +11,21 @@ type Alert struct {
 	ID         uint   `gorm:"primaryKey"`
 	ClientName string `json:"client_name"`
 
-	WazuhAlertID    string   `json:"wazuh_alert_id"`
-	RuleID          string   `json:"rule_id"`
-	RuleLevel       uint     `json:"rule_level"`
-	RuleDescription string   `json:"rule_description"`
-	Timestamp       string   `json:"timestamp"`
-	RawJSON         string   `json:"raw_json"`
-	Tags            []string `json:"tags"`
+	WazuhAlertID    string    `json:"wazuh_alert_id"`
+	RuleID          string    `json:"rule_id"`
+	RuleLevel       uint      `json:"rule_level"`
+	RuleDescription string    `json:"rule_description"`
+	Timestamp       time.Time `json:"timestamp"`
+	RawJSON         string    `json:"raw_json"`
+	Tags            string    `json:"tags"`
+	Sort            int       `json:"sort"`
 }
 
 func NewAlert(
 	db *gorm.DB,
-	wazuhAlertID, ruleID, ruleDescription, timestamp, rawJSON string,
+	wazuhAlertID, ruleID, ruleDescription, rawJSON string,
+	sort int,
+	timestamp time.Time,
 	ruleLevel uint,
 ) error {
 	alert := Alert{
@@ -33,7 +37,10 @@ func NewAlert(
 		RuleDescription: ruleDescription,
 		Timestamp:       timestamp,
 		RawJSON:         rawJSON,
+		Sort:            sort,
 	}
+
+	// Assign tags
 
 	result := db.Create(&alert)
 	if result.Error != nil {

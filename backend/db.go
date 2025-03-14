@@ -14,7 +14,7 @@ func (backend *Backend) initDB() error {
 		return err
 	}
 
-	err = backend.Db.AutoMigrate(&model.User{}, &model.Session{}, &model.Client{})
+	err = backend.Db.AutoMigrate(&model.User{}, &model.Session{}, &model.Client{}, &model.Alert{})
 	if err != nil {
 		return err
 	}
