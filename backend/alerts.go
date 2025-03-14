@@ -184,6 +184,7 @@ func (b Backend) SearchAlert(
 				alerts = append(alerts, alert)
 			}
 		}
+		alerts = alerts[(page-1)*perPage : page*perPage]
 		totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
 
 		// totalNumberOfPages =
