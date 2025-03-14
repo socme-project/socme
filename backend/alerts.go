@@ -187,17 +187,19 @@ func (b Backend) SearchAlert(
 		for rows.Next() {
 			var alert model.Alert
 			_ = b.Db.ScanRows(rows, &alert)
-			rank := fuzzy.RankMatchNormalizedFold(search, alert.RuleDescription)
+			rank := fuzzy.RankMatchNormalizedFold(alert.RuleDescription, search)
 			if rank >= 0 {
 				alertsRank = append(alertsRank, AlertRank{alert, rank})
 			}
 		}
 		// sort by rank then put in alerts
-		sort.Slice(alertsRank[:], func(i, j int) bool {
-			return alertsRank[i].rank > alertsRank[j].rank
-		})
+		if len(alertsRank) > 0 {
+			sort.Slice(alertsRank[:], func(i, j int) bool {
+				return alertsRank[i].rank > alertsRank[j].rank
+			})
+		}
 		for _, alertRank := range alertsRank {
-		  alerts = append(alerts, alertRank.alert)
+			alerts = append(alerts, alertRank.alert)
 		}
 		alerts = alerts[(page-1)*perPage : page*perPage]
 		totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
