@@ -47,7 +47,7 @@ func (b *Backend) AlertRoutes() {
 
 	b.Router.GET("/alerts/getlastfive", b.userMiddleware, func(c *gin.Context) {
 		alerts := []model.Alert{}
-		b.Db.Order("timestamp DESC").Limit(5).Find(&alerts)
+		b.Db.Order("timestamp DESC").Where("rule_level >= ?", 12).Limit(5).Find(&alerts)
 		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last five alerts retrieved"})
 	})
 
