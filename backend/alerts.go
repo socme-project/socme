@@ -7,6 +7,7 @@ import (
 	"time"
 
 	wazuhapi "github.com/socme-project/wazuh-go"
+	"gorm.io/gorm"
 )
 
 func (b Backend) UpdateAlerts() {
@@ -75,55 +76,56 @@ type Filter struct {
 
 // dorks -> ruleid rulelevel description(no need cause already implied)
 // search by rule description first, cf https://github.com/lithammer/fuzzysearch
+func (b Backend) SearchAlert(input string, filter Filter) ([]model.Alert, error) {
+	var alerts []model.Alert
+	query := b.Db.Model(&model.Alert{})
 
-// func (b Backend) SearchAlert(input string, filter Filter) ([]model.Alert, error) {
-// 	var alerts []model.Alert
-// 	query := b.Db.Model(&model.Alert{})
-//
-// 	if input != "" { // only for fzf
-// 		query = query.Where(
-// 			"rule_description ILIKE ? OR raw_json ILIKE ?",
-// 			"%"+input+"%",
-// 			"%"+input+"%",
-// 		)
-// 	}
-//
-// 	// Filter by severity as string
-// 	if len(filter.Severity) > 0 {
-// 		query = query.Where(func(db *gorm.DB) *gorm.DB {
-// 			for _, severity := range filter.Severity {
-// 				switch severity {
-// 				case "low":
-// 					db = db.Or("rule_level < ?", 5)
-// 				case "medium":
-// 					db = db.Or("rule_level >= ? AND rule_level < ?", 5, 12)
-// 				case "high":
-// 					db = db.Or("rule_level >= ?", 12)
-// 				}
-// 			}
-// 			return db
-// 		})
-// 	}
-//
-// 	if len(filter.RuleID) > 0 {
-// 		query = query.Where("rule_id IN ?", filter.RuleID)
-// 	}
-//
-// 	if len(filter.ClientName) > 0 {
-// 		query = query.Where("client_name IN ?", filter.ClientName)
-// 	}
-//
-// 	if len(filter.Tags) > 0 {
-// 		for _, tag := range filter.Tags {
-// 			query = query.Where("tags ILIKE ?", "%"+tag+"%")
-// 		}
-// 	}
-//
-// 	if err := query.Find(&alerts).Error; err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return alerts, nil
-// }
-//
-// func (b Backend) SearchPaginated...() {
+	// if input != "" { // only for fzf
+	// 	query = query.Where(
+	// 		"rule_description ILIKE ? OR raw_json ILIKE ?",
+	// 		"%"+input+"%",
+	// 		"%"+input+"%",
+	// 	)
+	// }
+
+	// Filter by severity as string
+	if len(filter.Severity) > 0 {
+		query = query.Where(func(db *gorm.DB) *gorm.DB {
+			for _, severity := range filter.Severity {
+				switch severity {
+				case "low":
+					db = db.Or("rule_level <= ?", 6)
+				case "medium":
+					db = db.Or("rule_level >= ? AND rule_level <= ?", 7, 11)
+				case "high":
+					db = db.Or("rule_level >= ? AND rule_level <= ?", 12, 14)
+				case "critical":
+					db = db.Or("rule_level >= ?", 15)
+				}
+			}
+			return db
+		})
+	}
+
+	// if len(filter.RuleID) > 0 {
+	// 	query = query.Where("rule_id IN ?", filter.RuleID)
+	// }
+	//
+	// if len(filter.ClientName) > 0 {
+	// 	query = query.Where("client_name IN ?", filter.ClientName)
+	// }
+	//
+	// if len(filter.Tags) > 0 {
+	// 	for _, tag := range filter.Tags {
+	// 		query = query.Where("tags ILIKE ?", "%"+tag+"%")
+	// 	}
+	// }
+
+	if err := query.Find(&alerts).Error; err != nil {
+		return nil, err
+	}
+
+	return alerts, nil
+}
+
+// func (b Backend) SearchPaginated() {
