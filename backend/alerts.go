@@ -99,16 +99,16 @@ func (b *Backend) AlertRoutes() {
 }
 
 func (b Backend) UpdateAlertsForClient(client model.Client) {
-	b.Logger.Info("-- Retrieving alerts for", client.Name)
+	b.Logger.Info("-- Retrieving alerts for " + client.Name)
 	lastID, err := b.GetLastAlertIdFromDb(client.Name)
 
 	if err != nil && err.Error() == "record not found" {
 		lastID = 0
 	} else if err != nil {
-		b.Logger.Error("Failed to retrieve last alert ID from db:", err)
+		b.Logger.Error("Failed to retrieve last alert ID from db: " + err.Error())
 		return
 	}
-	b.Logger.Info("Last ID:", lastID)
+	b.Logger.Info("Last ID: " + strconv.Itoa(lastID))
 
 	wazuhClient := wazuhapi.WazuhAPI{
 		Host:     client.WazuhIP,
@@ -125,13 +125,13 @@ func (b Backend) UpdateAlertsForClient(client model.Client) {
 	}
 
 	if wazuhClient.RefreshToken() != nil {
-		b.Logger.Error("Failed to refresh token:", err)
+		b.Logger.Error("Failed to refresh token: " + err.Error())
 		return
 	}
 
 	alerts, _, err := wazuhClient.GetAlerts(lastID)
 	if err != nil {
-		b.Logger.Error("Failed to retrieve alerts:", err)
+		b.Logger.Error("Failed to retrieve alerts: " + err.Error())
 		return
 	} else if len(alerts) == 0 {
 		return
