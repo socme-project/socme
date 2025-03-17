@@ -42,6 +42,7 @@
         },
       })
       .then((res) => {
+        console.log(res.data);
         alerts = res.data.alerts.map((alert: any) => ({
           id: alert.ID,
           title: alert.rule_description,
@@ -49,7 +50,6 @@
           client: alert.client_name,
           timestamp: alert.timestamp,
           raw: alert.raw_json,
-          client: alert.client_name,
         }));
         maxPage = res.data.maxPage;
       })

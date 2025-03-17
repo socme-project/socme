@@ -30,8 +30,7 @@ func NewAlert(
 	clientName string,
 ) error {
 	alert := Alert{
-		// ClientName:      clientName,
-
+		ClientName:      clientName,
 		WazuhAlertID:    wazuhAlertID,
 		RuleID:          ruleID,
 		RuleLevel:       ruleLevel,
