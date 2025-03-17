@@ -27,6 +27,7 @@ func NewAlert(
 	sort int,
 	timestamp time.Time,
 	ruleLevel uint,
+	clientName string,
 ) error {
 	alert := Alert{
 		// ClientName:      clientName,

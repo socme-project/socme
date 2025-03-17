@@ -18,8 +18,14 @@ func (b *Backend) ClientRoutes() {
 			b.Db,
 			c.Query("name"),
 			c.Query("logo"),
-			c.Query("artemisIP"),
-			c.Query("artemisPassword"),
+			c.Query("wazuhIP"),
+			c.Query("wazuhPort"),
+			c.Query("wazuhUsername"),
+			c.Query("wazuhPassword"),
+			c.Query("indexerIP"),
+			c.Query("indexerPort"),
+			c.Query("indexerUsername"),
+			c.Query("indexerPassword"),
 		)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})

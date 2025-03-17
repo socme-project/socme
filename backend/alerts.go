@@ -98,45 +98,54 @@ func (b *Backend) AlertRoutes() {
 }
 
 func (b Backend) UpdateAlerts() {
-	// Get clients first.
-	// Iterate the all function over clients
+	clients := model.GetAllClients(b.Db)
+	for _, client := range clients {
 
-	// GetLastAlertFromDb va mtn prendre client-name et faire un .Where
-	lastID, err := b.GetLastAlertIdFromDb()
-	if err != nil && err.Error() == "record not found" {
-		lastID = 0
-	} else if err != nil {
-		log.Println("Failed to retrieve last alert ID from db:", err)
-	}
+		lastID, err := b.GetLastAlertIdFromDb(client.Name)
+		if err != nil && err.Error() == "record not found" {
+			lastID = 0
+		} else if err != nil {
+			log.Println("Failed to retrieve last alert ID from db:", err)
+		}
 
-	// plus b.Wazuh, mais créer un Wazuh{} avec les ID stocké dans la DB
-	err = b.Wazuh.RefreshToken()
-	// clientwazuh = Wazuh{...}
-	// clientwazuh.RefreshToken()
-	if err != nil {
-		log.Fatal("Failed to refresh token:", err)
-	}
+		wazuhClient := wazuhapi.WazuhAPI{
+			Host:     client.WazuhIP,
+			Port:     client.WazuhPort,
+			Username: client.WazuhUsername,
+			Password: client.WazuhPassword,
+			Indexer: wazuhapi.Indexer{
+				Host:     client.IndexerIP,
+				Port:     client.IndexerPort,
+				Username: client.IndexerUsername,
+				Password: client.IndexerPassword,
+			},
+			Insecure: true,
+		}
 
-	for {
-		// clientwazuh.GetAlerts(lastID)
-		alerts, newLastID, err := b.Wazuh.GetAlerts(lastID)
+		err = wazuhClient.RefreshToken()
 		if err != nil {
-			log.Println("Failed to retrieve alerts:", err)
+			log.Fatal("Failed to refresh token:", err)
 		}
-		if len(alerts) > 0 {
-			err := b.AddAlertToDb(alerts)
+
+		for {
+			alerts, newLastID, err := wazuhClient.GetAlerts(lastID)
 			if err != nil {
-				log.Println("Failed to add alerts to db:", err)
+				log.Println("Failed to retrieve alerts:", err)
 			}
+			if len(alerts) > 0 {
+				err := b.AddAlertToDb(alerts, client.Name)
+				if err != nil {
+					log.Println("Failed to add alerts to db:", err)
+				}
+			}
+			lastID = newLastID
+			// TODO: Oublie la partie boucle, juste fait une fois et quit
+			time.Sleep(b.AlertRetrievalInterval)
 		}
-		lastID = newLastID
-		/// Oublie la partie boucle, juste fait une fois et quit
-		time.Sleep(b.AlertRetrievalInterval)
 	}
 }
 
-// Prend en plus un client name
-func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
+func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientName string) error {
 	layout := "2006-01-02T15:04:05.000-0700"
 	for _, alert := range alerts {
 		timestamp, err := time.Parse(layout, alert.Timestamp)
@@ -153,6 +162,7 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
 			alert.Sort,
 			timestamp,
 			alert.RuleLevel,
+			clientName,
 		)
 		if err != nil {
 			return err
@@ -161,10 +171,9 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
 	return nil
 }
 
-// TODO: Prend le client name
-func (b Backend) GetLastAlertIdFromDb() (lastID int, err error) {
+func (b Backend) GetLastAlertIdFromDb(clientName string) (int, error) {
 	var alert model.Alert
-	result := b.Db.Order("timestamp DESC").First(&alert) // check if result is logic
+	result := b.Db.Order("timestamp DESC").Where("client_name = ?", clientName).First(&alert)
 	if result.Error != nil {
 		return 0, result.Error
 	}

@@ -15,20 +15,35 @@ type Client struct {
 
 	LastAlert time.Time
 
-	ArtemisIsAlive  bool
-	ArtemisVersion  string
-	ArtemisIP       string
-	ArtemisPassword string
+	WazuhIsAlive    bool
+	WazuhVersion    string
+	WazuhIP         string
+	WazuhPort       string
+	WazuhUsername   string
+	WazuhPassword   string
+	IndexerIP       string
+	IndexerPort     string
+	IndexerUsername string
+	IndexerPassword string
 	// ...
 }
 
 // TODO: We don't want all name, all chars, check IP also
-func NewClient(db *gorm.DB, name, logo, artemisIP, artemisPassword string) error {
+func NewClient(
+	db *gorm.DB,
+	name, logo, wazuhIP, wazuhPort, wazuhUsername, wazuhPassword, indexerIP, indexerPort, indexerUsername, indexerPassword string,
+) error {
 	client := Client{
 		Name:            name,
 		Logo:            logo,
-		ArtemisIP:       artemisIP,
-		ArtemisPassword: artemisPassword,
+		WazuhIP:         wazuhIP,
+		WazuhPort:       wazuhPort,
+		WazuhUsername:   wazuhUsername,
+		WazuhPassword:   wazuhPassword,
+		IndexerIP:       indexerIP,
+		IndexerPort:     indexerPort,
+		IndexerUsername: indexerUsername,
+		IndexerPassword: indexerPassword,
 	}
 
 	result := db.Create(&client)
