@@ -53,35 +53,40 @@ func (b *Backend) AlertRoutes() {
 
 	b.Router.GET("/alerts/last24h/:severity", b.userMiddleware, func(c *gin.Context) {
 		severity := c.Param("severity")
-		alerts := []model.Alert{}
 		query := b.Db.Model(&model.Alert{})
 		switch severity {
 		case "low":
-			query = query.Or("rule_level <= ?", 6)
+			query = query.Where("rule_level <= ?", 6)
 		case "medium":
-			query = query.Or("rule_level >= ? AND rule_level <= ?", 7, 11)
+			query = query.Where("rule_level >= ? AND rule_level <= ?", 7, 11)
 		case "high":
-			query = query.Or("rule_level >= ? AND rule_level <= ?", 12, 14)
+			query = query.Where("rule_level >= ? AND rule_level <= ?", 12, 14)
 		case "critical":
-			query = query.Or("rule_level >= ?", 15)
+			query = query.Where("rule_level >= ?", 15)
 		}
-		// array of 12 length, 0 is the oldest... to display in dashboard, medium has its own bars, high has its own bars, etc
-		// for i := 0; i < 12; i++ {
-		// 	var alertsInHour []model.Alert
-		// 	query.Where("timestamp BETWEEN ? AND ?", time.Now().Add(-time.Hour*time.Duration(i+1)), time.Now().Add(-time.Hour*time.Duration(i))).
-		// 		Find(&alertsInHour)
-		// }
 
-		var numberOfEventsInLast24h []int // By range of 2 hours, so len = 12
-		for i := 0; i < 12; i++ {
-			var alertsInHour []model.Alert
-			query.Where("timestamp BETWEEN ? AND ?", time.Now().Add(-time.Hour*time.Duration(i+1)), time.Now().Add(-time.Hour*time.Duration(i))).
-				Find(&alertsInHour)
-			numberOfEventsInLast24h = append(numberOfEventsInLast24h, len(alertsInHour))
+		now := time.Now()
+		start := now.Add(-25 * time.Hour)
+
+		var alerts []model.Alert
+		query.Where("timestamp BETWEEN ? AND ?", start, now).Find(&alerts)
+		alertsPerHour := make([]int, 24)
+
+		for _, alert := range alerts {
+			hoursAgo := int(now.Sub(alert.Timestamp).Hours()) // Depuis combien d'heures ?
+			if hoursAgo >= 0 && hoursAgo < 24 {
+				alertsPerHour[23-hoursAgo]++ // Index inversé pour le bon ordre
+			}
 		}
+
+		var alertsPerHour12 []int
+		for i := 0; i < 12; i++ {
+			alertsPerHour12 = append(alertsPerHour12, alertsPerHour[i*2]+alertsPerHour[(i*2)+1])
+		}
+
 		c.JSON(
 			http.StatusOK,
-			gin.H{"alerts": numberOfEventsInLast24h, "message": "Last 24h alerts retrieved"},
+			gin.H{"events": alertsPerHour12, "message": "Last 24h alerts retrieved"},
 		)
 	})
 	b.Router.GET("/alerts/id/:id", b.userMiddleware, func(c *gin.Context) {
