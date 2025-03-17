@@ -1,8 +1,44 @@
 <script lang="ts">
   import ArtemisStatus from "./dashboard/artemis-status.svelte";
   import Alerts from "./dashboard/alerts.svelte";
-  import ClientList from "./dashboard/client-list.svelte";
   import { LayoutDashboard } from "lucide-svelte";
+  import axios from "axios";
+  import { onMount } from "svelte";
+  import { toast } from "svelte-sonner";
+  import type { Alert } from "./alerts/columns";
+  import AlertList from "./dashboard/alert-list.svelte";
+
+  let lastFiveAlerts: Alert[] = $state([]);
+
+  onMount(() => {
+    axios
+      .get("/api/alerts/getlastfive", {
+        headers: { Authorization: localStorage.getItem("token") },
+      })
+      .then((res) => {
+        lastFiveAlerts = res.data.alerts.map((alert: any) => ({
+          id: alert.ID,
+          title: alert.rule_description,
+          severity: alert.rule_level,
+          client: alert.client_name,
+          timestamp: alert.timestamp,
+        }));
+      })
+      .catch(() => {
+        toast.error("Internal server error");
+      });
+
+    axios
+      .get("/api/alerts/last24h/high", {
+        headers: { Authorization: localStorage.getItem("token") },
+      })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch(() => {
+        toast.error("Internal server error");
+      });
+  });
 </script>
 
 <h1 class="flex items-center gap-4 mb-8">
@@ -22,6 +58,6 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2">
-    <ClientList />
+    <AlertList data={lastFiveAlerts} />
   </div>
 </div>

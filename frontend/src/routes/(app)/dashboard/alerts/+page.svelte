@@ -1,6 +1,9 @@
 <script lang="ts">
   import {
-    ChevronLastIcon,
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
     FileQuestionIcon,
     ShieldAlert,
     TouchpadOffIcon,
@@ -8,28 +11,35 @@
   import { columns } from "./columns";
   import DataTable from "./data-table.svelte";
   import type { Alert } from "./columns";
-  import * as Pagination from "$lib/components/ui/pagination/index.js";
   import Filters from "./filters.svelte";
   import FiltersSingle from "./filtersSingle.svelte";
   import Input from "$lib/components/ui/input/input.svelte";
-  import { onMount } from "svelte";
   import axios from "axios";
   import { toast } from "svelte-sonner";
   import Button from "$lib/components/ui/button/button.svelte";
-  import { Next, Previous } from "$lib/components/ui/carousel";
+  import * as Select from "$lib/components/ui/select/index.js";
 
   let currentPage = $state(1);
 
   let perPage = $state(10);
+  let perPageString = $state("10");
+  $effect(() => {
+    perPage = parseInt(perPageString);
+  });
   let maxPage = $state(1);
 
   let alerts: Alert[] = $state([]);
 
-  $effect(async () => {
-    await axios
+  $effect(() => {
+    axios
       .get("/api/alerts/page", {
         headers: { Authorization: localStorage.getItem("token") },
-        params: { page: currentPage, perPage: perPage },
+        params: {
+          page: currentPage,
+          perPage: perPage,
+          severity: severityValues.join(","),
+          search: search,
+        },
       })
       .then((res) => {
         alerts = res.data.alerts.map((alert: any) => ({
@@ -41,27 +51,37 @@
           raw: alert.raw_json,
         }));
         maxPage = res.data.maxPage;
-        console.log(res.data);
       })
       .catch(() => {
         toast.error("Internal server error");
       });
   });
 
-  export const statuses = [
+  export const severity = [
     {
-      value: "backlog",
-      label: "Backlog",
+      value: "low",
+      label: "Low",
       icon: FileQuestionIcon,
     },
     {
-      value: "todo",
-      label: "Todo",
+      value: "medium",
+      label: "Medium",
+      icon: TouchpadOffIcon,
+    },
+    {
+      value: "high",
+      label: "High",
+      icon: FileQuestionIcon,
+    },
+    {
+      value: "critical",
+      label: "Critical",
       icon: TouchpadOffIcon,
     },
   ];
 
   let selectedValues = $state([]);
+  let severityValues = $state([]);
   let selectedValue = $state("");
   let search = $state("");
 </script>
@@ -78,33 +98,48 @@
     class="h-8 w-[150px] lg:w-[250px]"
   />
   <p class="text-muted">Filters:</p>
-  <Filters title="Severity" options={statuses} bind:selectedValues />
-  <FiltersSingle title="Clients" options={statuses} bind:selectedValue />
-  <Filters title="Tag" options={statuses} bind:selectedValues />
+  <Filters
+    title="Severity"
+    options={severity}
+    bind:selectedValues={severityValues}
+  />
+  <FiltersSingle title="Clients" options={severity} bind:selectedValue />
+  <Filters title="Tag" options={severity} bind:selectedValues />
   <!-- Rule ID // maybe in search -->
   <!-- Time // maybe in search -->
 </div>
 
 <DataTable data={alerts} {columns} />
 
-<div class="flex justify-between gap-4 flex-wrap">
-  <p>
-    Page {currentPage} of {maxPage}
-  </p>
+<div class="flex justify-between gap-4 flex-wrap items-center my-4">
+  <div class="flex items-center gap-4">
+    <p class="text-xs text-muted-foreground">
+      Page {currentPage} of {maxPage} | Per page:
+    </p>
+    <Select.Root type="single" bind:value={perPageString}>
+      <Select.Trigger class="w-[80px] p-1 h-6">{perPage}</Select.Trigger>
+      <Select.Content>
+        <Select.Item value="10">10</Select.Item>
+        <Select.Item value="20">20</Select.Item>
+        <Select.Item value="50">50</Select.Item>
+        <Select.Item value="100">100</Select.Item>
+      </Select.Content>
+    </Select.Root>
+  </div>
   <div>
     <Button
       variant="ghost"
       disabled={currentPage === 1}
       onclick={() => (currentPage = 1)}
     >
-      First
+      <ChevronsLeft />
     </Button>
     <Button
       variant="ghost"
       disabled={currentPage === 1}
       onclick={() => (currentPage -= 1)}
     >
-      Previous
+      <ChevronLeft />
     </Button>
 
     <Button
@@ -112,7 +147,7 @@
       disabled={currentPage === maxPage}
       onclick={() => (currentPage += 1)}
     >
-      Next
+      <ChevronRight />
     </Button>
 
     <Button
@@ -120,7 +155,7 @@
       disabled={currentPage === maxPage}
       onclick={() => (currentPage = maxPage)}
     >
-      Last
+      <ChevronsRight />
     </Button>
   </div>
 </div>
