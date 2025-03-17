@@ -136,7 +136,7 @@
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
         <label for="indexerusername" class="text-right">Indexer username</label>
-        <input
+        <Input
           id="indexerusername"
           bind:value={indexerUsername}
           class="col-span-3"
@@ -145,7 +145,7 @@
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
         <label for="indexerpassword" class="text-right">Indexer password</label>
-        <input
+        <Input
           id="indexerpassword"
           bind:value={indexerPassword}
           type="password"
