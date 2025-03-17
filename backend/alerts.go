@@ -98,6 +98,10 @@ func (b *Backend) AlertRoutes() {
 }
 
 func (b Backend) UpdateAlerts() {
+	// Get clients first.
+	// Iterate the all function over clients
+
+	// GetLastAlertFromDb va mtn prendre client-name et faire un .Where
 	lastID, err := b.GetLastAlertIdFromDb()
 	if err != nil && err.Error() == "record not found" {
 		lastID = 0
@@ -105,12 +109,16 @@ func (b Backend) UpdateAlerts() {
 		log.Println("Failed to retrieve last alert ID from db:", err)
 	}
 
+	// plus b.Wazuh, mais créer un Wazuh{} avec les ID stocké dans la DB
 	err = b.Wazuh.RefreshToken()
+	// clientwazuh = Wazuh{...}
+	// clientwazuh.RefreshToken()
 	if err != nil {
 		log.Fatal("Failed to refresh token:", err)
 	}
 
 	for {
+		// clientwazuh.GetAlerts(lastID)
 		alerts, newLastID, err := b.Wazuh.GetAlerts(lastID)
 		if err != nil {
 			log.Println("Failed to retrieve alerts:", err)
@@ -122,10 +130,12 @@ func (b Backend) UpdateAlerts() {
 			}
 		}
 		lastID = newLastID
+		/// Oublie la partie boucle, juste fait une fois et quit
 		time.Sleep(b.AlertRetrievalInterval)
 	}
 }
 
+// Prend en plus un client name
 func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
 	layout := "2006-01-02T15:04:05.000-0700"
 	for _, alert := range alerts {
@@ -133,7 +143,6 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
 		if err != nil {
 			return err
 		}
-		// TODO: check if we need to RFC3339, or if there is another universal default format
 
 		err = model.NewAlert(
 			b.Db,
@@ -152,6 +161,7 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert) error {
 	return nil
 }
 
+// TODO: Prend le client name
 func (b Backend) GetLastAlertIdFromDb() (lastID int, err error) {
 	var alert model.Alert
 	result := b.Db.Order("timestamp DESC").First(&alert) // check if result is logic
