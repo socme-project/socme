@@ -14,14 +14,14 @@ import (
 )
 
 type Backend struct {
-	Port                   string
-	DbPath                 string
-	IsProd                 bool
-	AlertRetrievalInterval time.Duration
-	Wazuh                  *wazuhapi.WazuhAPI
-	Db                     *gorm.DB
-	Router                 *gin.Engine
-	Oauth                  Oauth
+	Port        string
+	DbPath      string
+	IsProd      bool
+	RefreshRate time.Duration
+	Wazuh       *wazuhapi.WazuhAPI
+	Db          *gorm.DB
+	Router      *gin.Engine
+	Oauth       Oauth
 }
 
 type Oauth struct {
@@ -39,10 +39,10 @@ func main() {
 
 	interval, _ := time.ParseDuration(os.Getenv("ALERT_RETRIEVAL_INTERVAL"))
 	backend := Backend{
-		DbPath:                 os.Getenv("DB_PATH"),
-		Port:                   os.Getenv("BACKEND_PORT"),
-		IsProd:                 os.Getenv("IS_PROD") == "true",
-		AlertRetrievalInterval: interval,
+		DbPath:      os.Getenv("DB_PATH"),
+		Port:        os.Getenv("BACKEND_PORT"),
+		IsProd:      os.Getenv("IS_PROD") == "true",
+		RefreshRate: interval,
 		Oauth: Oauth{
 			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
 			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
@@ -80,8 +80,8 @@ func main() {
 		backend.Port = "8080"
 	}
 
-	if backend.AlertRetrievalInterval == 0 {
-		backend.AlertRetrievalInterval = 5 * time.Minute
+	if backend.RefreshRate == 0 {
+		backend.RefreshRate = 5 * time.Minute
 	}
 
 	err = backend.initDB()

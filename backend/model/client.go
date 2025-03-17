@@ -15,6 +15,8 @@ type Client struct {
 
 	LastAlert time.Time
 
+	RefreshRate time.Duration
+
 	WazuhIsAlive    bool
 	WazuhVersion    string
 	WazuhIP         string

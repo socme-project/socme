@@ -45,12 +45,14 @@ func (b *Backend) AlertRoutes() {
 		)
 	})
 
+	// TODO: Filter by clientname, if clientname == all, then no filter
 	b.Router.GET("/alerts/getlastfive", b.userMiddleware, func(c *gin.Context) {
 		alerts := []model.Alert{}
 		b.Db.Order("timestamp DESC").Where("rule_level >= ?", 12).Limit(5).Find(&alerts)
 		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last five alerts retrieved"})
 	})
 
+	// TODO: Filter by clientname, if clientname == all, then no filter
 	b.Router.GET("/alerts/last24h/:severity", b.userMiddleware, func(c *gin.Context) {
 		severity := c.Param("severity")
 		query := b.Db.Model(&model.Alert{})
@@ -97,51 +99,62 @@ func (b *Backend) AlertRoutes() {
 	})
 }
 
+func (b Backend) UpdateAlertsForClient(client model.Client) {
+	log.Println("Retrieving alerts for", client.Name)
+	lastID, err := b.GetLastAlertIdFromDb(client.Name)
+
+	if err != nil && err.Error() == "record not found" {
+		lastID = 0
+	} else if err != nil {
+		log.Println("Failed to retrieve last alert ID from db:", err)
+		return
+	}
+	log.Println("Last ID:", lastID)
+
+	wazuhClient := wazuhapi.WazuhAPI{
+		Host:     client.WazuhIP,
+		Port:     client.WazuhPort,
+		Username: client.WazuhUsername,
+		Password: client.WazuhPassword,
+		Indexer: wazuhapi.Indexer{
+			Host:     client.IndexerIP,
+			Port:     client.IndexerPort,
+			Username: client.IndexerUsername,
+			Password: client.IndexerPassword,
+		},
+		Insecure: true,
+	}
+
+	if wazuhClient.RefreshToken() != nil {
+		log.Println("Failed to refresh token:", err)
+		return
+	}
+
+	alerts, _, err := wazuhClient.GetAlerts(lastID)
+	if err != nil {
+		log.Println("Failed to retrieve alerts:", err)
+		return
+	} else if len(alerts) == 0 {
+		return
+	}
+
+	err = b.AddAlertToDb(alerts, client.Name)
+	if err != nil {
+		log.Println("Failed to add alerts to db:", err)
+		return
+	}
+}
+
 func (b Backend) UpdateAlerts() {
-	clients := model.GetAllClients(b.Db)
-	for _, client := range clients {
-
-		lastID, err := b.GetLastAlertIdFromDb(client.Name)
-		if err != nil && err.Error() == "record not found" {
-			lastID = 0
-		} else if err != nil {
-			log.Println("Failed to retrieve last alert ID from db:", err)
+	log.Println("Starting alert retrieval")
+	for {
+		clients := model.GetAllClients(b.Db)
+		log.Println("Retrieving alerts for", len(clients), "clients: ", clients)
+		for _, client := range clients {
+			go b.UpdateAlertsForClient(client)
 		}
-
-		wazuhClient := wazuhapi.WazuhAPI{
-			Host:     client.WazuhIP,
-			Port:     client.WazuhPort,
-			Username: client.WazuhUsername,
-			Password: client.WazuhPassword,
-			Indexer: wazuhapi.Indexer{
-				Host:     client.IndexerIP,
-				Port:     client.IndexerPort,
-				Username: client.IndexerUsername,
-				Password: client.IndexerPassword,
-			},
-			Insecure: true,
-		}
-
-		err = wazuhClient.RefreshToken()
-		if err != nil {
-			log.Fatal("Failed to refresh token:", err)
-		}
-
-		for {
-			alerts, newLastID, err := wazuhClient.GetAlerts(lastID)
-			if err != nil {
-				log.Println("Failed to retrieve alerts:", err)
-			}
-			if len(alerts) > 0 {
-				err := b.AddAlertToDb(alerts, client.Name)
-				if err != nil {
-					log.Println("Failed to add alerts to db:", err)
-				}
-			}
-			lastID = newLastID
-			// TODO: Oublie la partie boucle, juste fait une fois et quit
-			time.Sleep(b.AlertRetrievalInterval)
-		}
+		// Change that
+		time.Sleep(b.RefreshRate)
 	}
 }
 
