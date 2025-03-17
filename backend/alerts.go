@@ -185,7 +185,9 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientName string) error 
 
 func (b Backend) GetLastAlertIdFromDb(clientName string) (int, error) {
 	var alert model.Alert
-	result := b.Db.Order("timestamp DESC").Where("client_name = ?", clientName).First(&alert)
+	result := b.Db.Order("timestamp DESC, sort DESC").
+		Where("client_name = ?", clientName).
+		First(&alert)
 	if result.Error != nil {
 		return 0, result.Error
 	}
