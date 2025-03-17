@@ -5,22 +5,54 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import axios from "axios";
   import { toast } from "svelte-sonner";
+
   let name = $state("");
   let logo = $state("");
-  let artemisIP = $state("");
-  let artemisPassword = $state("");
+
+  let wazuhHost = $state(""); // 192.168.1.102:55000
+  let wazuhUsername = $state("");
+  let wazuhPassword = $state("");
+
+  let indexerHost = $state("");
+  let indexerUsername = $state("");
+  let indexerPassword = $state("");
 
   let isOpen = $state(false);
 
   async function handleSubmit() {
+    if (
+      !name ||
+      !logo ||
+      !wazuhHost ||
+      !wazuhUsername ||
+      !wazuhPassword ||
+      !indexerHost ||
+      !indexerUsername ||
+      !indexerPassword
+    ) {
+      toast.error("Please fill out all fields");
+      return;
+    }
+    if (!wazuhHost.includes(":") || !indexerHost.includes(":")) {
+      toast.error("Please provide a valid host:port combination");
+      return;
+    }
     await axios
       .get("/api/client/new", {
         headers: { Authorization: localStorage.getItem("token") },
         params: {
           name: name,
           logo: logo,
-          artemisIP: artemisIP,
-          artemisPassword: artemisPassword,
+
+          wazuhIP: wazuhHost.split(":")[0],
+          wazuhPort: wazuhHost.split(":")[1],
+          wazuhUsername: wazuhUsername,
+          wazuhPassword: wazuhPassword,
+
+          indexerIP: indexerHost.split(":")[0],
+          indexerPort: indexerHost.split(":")[1],
+          indexerUsername: indexerUsername,
+          indexerPassword: indexerPassword,
         },
       })
       .then(() => {
@@ -66,21 +98,59 @@
         />
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
-        <Label for="artemisIP" class="text-right">Artemis IP</Label>
+        <Label for="wazuhhost" class="text-right">Wazuh host</Label>
         <Input
-          id="artemisIP"
-          bind:value={artemisIP}
+          id="wazuhhost"
+          bind:value={wazuhHost}
           class="col-span-3"
-          placeholder="Artemis IP"
+          placeholder="192.168.1.102:55000"
         />
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
-        <Label for="artemisPassword" class="text-right">Artemis password</Label>
+        <Label for="wazuhusername" class="text-right">Wazuh username</Label>
         <Input
-          id="artemisPassword"
-          bind:value={artemisPassword}
+          id="wazuhusername"
+          bind:value={wazuhUsername}
           class="col-span-3"
-          placeholder="Artemis password"
+          placeholder="admin"
+        />
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4">
+        <Label for="wazuhpassword" class="text-right">Wazuh password</Label>
+        <Input
+          id="wazuhpassword"
+          bind:value={wazuhPassword}
+          class="col-span-3"
+          placeholder="mypassword123"
+          type="password"
+        />
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4">
+        <Label for="indexerhost" class="text-right">Indexer host</Label>
+        <Input
+          id="indexerhost"
+          bind:value={indexerHost}
+          class="col-span-3"
+          placeholder="192.168.1.102:9200"
+        />
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4">
+        <label for="indexerusername" class="text-right">Indexer username</label>
+        <input
+          id="indexerusername"
+          bind:value={indexerUsername}
+          class="col-span-3"
+          placeholder="admin"
+        />
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4">
+        <label for="indexerpassword" class="text-right">Indexer password</label>
+        <input
+          id="indexerpassword"
+          bind:value={indexerPassword}
+          type="password"
+          class="col-span-3"
+          placeholder="mypassword123"
         />
       </div>
     </div>
