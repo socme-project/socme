@@ -49,6 +49,7 @@
           client: alert.client_name,
           timestamp: alert.timestamp,
           raw: alert.raw_json,
+          client: alert.client_name,
         }));
         maxPage = res.data.maxPage;
       })

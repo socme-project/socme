@@ -13,6 +13,16 @@ func (b *Backend) ClientRoutes() {
 		c.JSON(http.StatusOK, gin.H{"clients": clients})
 	})
 
+b.Router.GET("/client/:id", b.userMiddleware, func(c *gin.Context) {
+		id := c.Param("id")
+		client, err := model.GetClientByID(b.Db, id)
+		if err != nil {
+	c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	  }
+	  c.JSON(http.StatusOK, gin.H{"client": client, "message": "Client retrieved"})
+	})
+	  
+
 	b.Router.GET("/client/new", b.userMiddleware, func(c *gin.Context) {
 		err := model.NewClient(
 			b.Db,

@@ -8,7 +8,6 @@
   import { toast } from "svelte-sonner";
   import { onMount } from "svelte";
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
-  import NewClient from "./newClient.svelte";
 
   let clients: any = $state([]);
 
@@ -31,7 +30,6 @@
     <FolderCog />
     Clients
   </h1>
-  <NewClient />
 </div>
 
 <Table.Root>
@@ -107,10 +105,11 @@
               <DropdownMenu.Content>
                 <DropdownMenu.Group>
                   <a href={"/dashboard/clients/" + client.ID}>
-                    <DropdownMenu.Item>More informations</DropdownMenu.Item>
+                  <DropdownMenu.Item
+                  >More informations</DropdownMenu.Item>
                   </a>
                   <a href={"https://" + client.WazuhIP + ":" + 443}>
-                    <DropdownMenu.Item>Open Wazuh dashboard</DropdownMenu.Item>
+                  <DropdownMenu.Item>Open Wazuh dashboard</DropdownMenu.Item>
                   </a>
                 </DropdownMenu.Group>
               </DropdownMenu.Content>
