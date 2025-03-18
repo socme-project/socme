@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/model"
+	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -15,8 +16,20 @@ import (
 
 func (b *Backend) AlertRoutes() {
 	b.Router.GET("/alerts/all", b.userMiddleware, func(c *gin.Context) {
-		alerts := []model.Alert{}
-		b.Db.Order("timestamp DESC").Find(&alerts)
+		clientIDStr := c.Query("clientID") // Get ClientID from query params
+
+		var alerts []model.Alert
+		query := b.Db.Order("timestamp DESC")
+
+		if clientIDStr != "" {
+			clientID, err := strconv.ParseUint(clientIDStr, 10, 32)
+			if err == nil {
+				query = query.Where("client_id = ?", uint(clientID))
+			}
+		}
+
+		query.Find(&alerts)
+
 		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "All alerts retrieved"})
 	})
 
@@ -100,7 +113,7 @@ func (b *Backend) AlertRoutes() {
 
 func (b Backend) UpdateAlertsForClient(client model.Client) {
 	b.Logger.Info("-- Retrieving alerts for " + client.Name)
-	lastID, err := b.GetLastAlertIdFromDb(client.Name)
+	lastID, err := b.GetLastAlertIdFromDb(client.ID)
 
 	if err != nil && err.Error() == "record not found" {
 		lastID = 0
@@ -137,7 +150,7 @@ func (b Backend) UpdateAlertsForClient(client model.Client) {
 		return
 	}
 
-	err = b.AddAlertToDb(alerts, client.Name)
+	err = b.AddAlertToDb(alerts, client.ID)
 	if err != nil {
 		b.Logger.Error("Failed to add alerts to db:", err)
 		return
@@ -157,7 +170,12 @@ func (b Backend) UpdateAlerts() {
 	}
 }
 
-func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientName string) error {
+func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientID uint) error {
+	var client model.Client
+	if err := b.Db.First(&client, clientID).Error; err != nil {
+		return fmt.Errorf("client not found: %w", err)
+	}
+
 	layout := "2006-01-02T15:04:05.000-0700"
 	for _, alert := range alerts {
 		timestamp, err := time.Parse(layout, alert.Timestamp)
@@ -165,7 +183,7 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientName string) error 
 			return err
 		}
 
-		err = model.NewAlert(
+		err = client.NewAlert(
 			b.Db,
 			alert.WazuhAlertID,
 			alert.RuleID,
@@ -174,7 +192,6 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientName string) error 
 			alert.Sort,
 			timestamp,
 			alert.RuleLevel,
-			clientName,
 		)
 		if err != nil {
 			return err
@@ -183,10 +200,10 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientName string) error 
 	return nil
 }
 
-func (b Backend) GetLastAlertIdFromDb(clientName string) (int, error) {
+func (b Backend) GetLastAlertIdFromDb(clientID uint) (int, error) {
 	var alert model.Alert
 	result := b.Db.Order("timestamp DESC, sort DESC").
-		Where("client_name = ?", clientName).
+		Where("client_id = ?", clientID).
 		First(&alert)
 	if result.Error != nil {
 		return 0, result.Error
@@ -212,33 +229,26 @@ func (b Backend) SearchAlert(
 	query := b.Db.Model(&model.Alert{}).Order("timestamp DESC")
 
 	// Filter by severity as string
-	if len(filter.Severity) > 0 {
+	if len(filter.Severity) > 0 && filter.Severity[0] != "" {
+		severityQuery := b.Db.Where("1 = 0") // Start with a false condition
 		for _, severity := range filter.Severity {
 			switch severity {
 			case "low":
-				query = query.Or("rule_level <= ?", 6)
+				severityQuery = severityQuery.Or("rule_level <= ?", 6)
 			case "medium":
-				query = query.Or("rule_level >= ? AND rule_level <= ?", 7, 11)
+				severityQuery = severityQuery.Or("rule_level >= ? AND rule_level <= ?", 7, 11)
 			case "high":
-				query = query.Or("rule_level >= ? AND rule_level <= ?", 12, 14)
+				severityQuery = severityQuery.Or("rule_level >= ? AND rule_level <= ?", 12, 14)
 			case "critical":
-				query = query.Or("rule_level >= ?", 15)
+				severityQuery = severityQuery.Or("rule_level >= ?", 15)
 			}
 		}
+		query = query.Where(severityQuery)
 	}
 
-	// if len(filter.RuleID) > 0 {
-	// 	query = query.Where("rule_id IN ?", filter.RuleID)
-	// }
-	//
-	// if len(filter.ClientName) > 0 {
-	// 	query = query.Where("client_name IN ?", filter.ClientName)
-	// }
-	//
-	// if len(filter.Tags) > 0 {
-	// 	for _, tag := range filter.Tags {
-	// 		query = query.Where("tags ILIKE ?", "%"+tag+"%")
-	// 	}
+	// Add clientID filtering if you've added it to the Filter struct
+	// if filter.ClientID != nil && len(filter.ClientID) > 0 {
+	//     query = query.Where("client_id IN ?", filter.ClientID)
 	// }
 
 	var totalNumberOfPages int64 = 0
@@ -263,26 +273,41 @@ func (b Backend) SearchAlert(
 		alertsRank := []AlertRank{}
 		for rows.Next() {
 			var alert model.Alert
-			_ = b.Db.ScanRows(rows, &alert)
+			err := b.Db.ScanRows(rows, &alert)
+			if err != nil {
+				return nil, 0, err
+			}
+
 			rank := fuzzy.RankMatchNormalizedFold(search, alert.RuleDescription)
 			if rank >= 0 {
 				alertsRank = append(alertsRank, AlertRank{alert, rank})
 			}
 		}
-		// sort by rank then put in alerts
+
+		// Sort by rank then put in alerts
 		if len(alertsRank) > 0 {
 			sort.Slice(alertsRank[:], func(i, j int) bool {
 				return alertsRank[i].rank < alertsRank[j].rank
 			})
-		} else {
-			return []model.Alert{}, 0, nil
-		}
-		for _, alertRank := range alertsRank {
-			alerts = append(alerts, alertRank.alert)
-		}
-		totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
-		if len(alerts) > perPage {
-			alerts = alerts[(page-1)*perPage : page*perPage]
+
+			for _, alertRank := range alertsRank {
+				alerts = append(alerts, alertRank.alert)
+			}
+
+			totalNumberOfPages = int64(len(alerts))/int64(perPage) + 1
+
+			// Ensure pagination doesn't exceed array bounds
+			start := (page - 1) * perPage
+			end := page * perPage
+
+			if start < len(alerts) {
+				if end > len(alerts) {
+					end = len(alerts)
+				}
+				alerts = alerts[start:end]
+			} else {
+				alerts = []model.Alert{}
+			}
 		}
 	}
 

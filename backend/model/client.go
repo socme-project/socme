@@ -8,10 +8,10 @@ import (
 )
 
 type Client struct {
-	ID   uint   `gorm:"primaryKey"`
-	Name string `gorm:"uniqueIndex"`
-	Logo string
-	// Alerts []Alert
+	ID     uint   `gorm:"primaryKey"`
+	Name   string `gorm:"uniqueIndex"`
+	Logo   string
+	Alerts []Alert `gorm:"constraint:OnDelete:CASCADE;"` // One-to-many relationship
 
 	LastAlert time.Time
 

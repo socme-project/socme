@@ -8,8 +8,8 @@ import (
 )
 
 type Alert struct {
-	ID         uint   `gorm:"primaryKey"`
-	ClientName string `json:"client_name"`
+	ID       uint `gorm:"primaryKey"`
+	ClientID uint `gorm:"index"      json:"client_id"` // Foreign key for Client
 
 	WazuhAlertID    string    `json:"wazuh_alert_id"`
 	RuleID          string    `json:"rule_id"`
@@ -19,18 +19,19 @@ type Alert struct {
 	RawJSON         string    `json:"raw_json"`
 	Tags            string    `json:"tags"`
 	Sort            int       `json:"sort"`
+
+	Client *Client `gorm:"constraint:OnDelete:CASCADE;" json:"client,omitempty"`
 }
 
-func NewAlert(
+func (c *Client) NewAlert(
 	db *gorm.DB,
 	wazuhAlertID, ruleID, ruleDescription, rawJSON string,
 	sort int,
 	timestamp time.Time,
 	ruleLevel uint,
-	clientName string,
 ) error {
 	alert := Alert{
-		ClientName:      clientName,
+		ClientID:        c.ID,
 		WazuhAlertID:    wazuhAlertID,
 		RuleID:          ruleID,
 		RuleLevel:       ruleLevel,
@@ -39,7 +40,6 @@ func NewAlert(
 		RawJSON:         rawJSON,
 		Sort:            sort,
 	}
-
 	// Assign tags
 
 	result := db.Create(&alert)
