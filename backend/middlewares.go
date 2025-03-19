@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// authMiddleware checks if the user is authenticated (guest or user or admin)
 func (b *Backend) authMiddleware(c *gin.Context) {
 	_, err := model.GetUserFromRequest(b.Db, c)
 	if err != nil {
@@ -17,6 +18,7 @@ func (b *Backend) authMiddleware(c *gin.Context) {
 	c.Next()
 }
 
+// userMiddleware checks if the user is authenticated as a user or admin
 func (b *Backend) userMiddleware(c *gin.Context) {
 	user, err := model.GetUserFromRequest(b.Db, c)
 	if err != nil {
@@ -32,6 +34,7 @@ func (b *Backend) userMiddleware(c *gin.Context) {
 	c.Next()
 }
 
+// adminMiddleware checks if the user is authenticated as an admin
 func (b *Backend) adminMiddleware(c *gin.Context) {
 	user, err := model.GetUserFromRequest(b.Db, c)
 	if err != nil {

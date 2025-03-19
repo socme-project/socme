@@ -37,11 +37,11 @@
 <Table.Root>
   <Table.Header>
     <Table.Row>
-      <Table.Head class="w-[30px]">ID</Table.Head>
       <Table.Head class="w-[300px]">name</Table.Head>
       <Table.Head>version</Table.Head>
       <Table.Head>wazuh host</Table.Head>
       <Table.Head>indexer host</Table.Head>
+      <Table.Head class="w-[30px]">ID</Table.Head>
       <Table.Head></Table.Head>
     </Table.Row>
   </Table.Header>
@@ -49,9 +49,6 @@
     {#if clients.length === 0}
       {#each Array(6) as _}
         <Table.Row>
-          <Table.Cell>
-            <Skeleton class="w-[30px] h-4" />
-          </Table.Cell>
           <Table.Cell class="flex justify-start items-center gap-4">
             <Skeleton class="rounded-full animate-pulse h-2 w-2" />
             <Skeleton class="size-10 rounded-full" />
@@ -69,12 +66,14 @@
           <Table.Cell>
             <Skeleton class="w-[20px] h-3" />
           </Table.Cell>
+          <Table.Cell>
+            <Skeleton class="w-[30px] h-4" />
+          </Table.Cell>
         </Table.Row>
       {/each}
     {:else}
       {#each clients as client}
         <Table.Row>
-          <Table.Cell>{client.ID}</Table.Cell>
           <Table.Cell class="flex justify-start items-center gap-4">
             <div
               class="rounded-full animate-pulse h-2 w-2"
@@ -116,6 +115,8 @@
               </DropdownMenu.Content>
             </DropdownMenu.Root>
           </Table.Cell>
+
+          <Table.Cell>{client.ID}</Table.Cell>
         </Table.Row>
       {/each}
     {/if}

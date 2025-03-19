@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/model"
 	"fmt"
 	"os"
 	"time"
@@ -8,18 +9,16 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	wazuhapi "github.com/socme-project/wazuh-go"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 type Backend struct {
 	Port        string
-	DbPath      string
 	IsProd      bool
 	RefreshRate time.Duration
-	Wazuh       *wazuhapi.WazuhAPI
 	Db          *gorm.DB
 	Router      *gin.Engine
 	Oauth       Oauth
@@ -40,9 +39,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "data.db"
+	}
+
 	interval, _ := time.ParseDuration(os.Getenv("ALERT_RETRIEVAL_INTERVAL"))
 	backend := Backend{
-		DbPath:      os.Getenv("DB_PATH"),
 		Port:        os.Getenv("BACKEND_PORT"),
 		IsProd:      os.Getenv("IS_PROD") == "true",
 		RefreshRate: interval,
@@ -56,19 +59,6 @@ func main() {
 			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 			RedirectURL:  os.Getenv("GITHUB_REDIRECT_URL"),
 		},
-		Wazuh: &wazuhapi.WazuhAPI{
-			Host:     "10.8.178.20",
-			Port:     "55000",
-			Username: "admin",
-			Password: "HMthisismys3cr3tP5ssword34a;",
-			Indexer: wazuhapi.Indexer{
-				Username: "admin",
-				Password: "HMthisismys3cr3tP5ssword34a;",
-				Host:     "10.8.178.20",
-				Port:     "9200",
-			},
-			Insecure: true,
-		},
 	}
 
 	backend.Oauth.Cfg = &oauth2.Config{
@@ -80,10 +70,6 @@ func main() {
 	}
 
 	// Default values
-	if backend.DbPath == "" {
-		backend.DbPath = "data.db"
-	}
-
 	if backend.Port == "" {
 		backend.Port = "8080"
 	}
@@ -92,6 +78,7 @@ func main() {
 		backend.RefreshRate = 5 * time.Minute
 	}
 
+	// Start
 	err = backend.initDB()
 	if err != nil {
 		backend.Logger.Fatal("Error while initializing the database: ", err)
@@ -106,6 +93,7 @@ func main() {
 	backend.UserRoutes()
 	backend.ClientRoutes()
 	backend.AlertRoutes()
+	backend.MiscRoutes()
 
 	backend.Logger.Info("Starting UpdateAlerts loop")
 	go backend.UpdateAlerts()
@@ -116,4 +104,22 @@ func main() {
 	if err != nil {
 		backend.Logger.Fatal("Error while starting the server: " + err.Error())
 	}
+}
+
+func (backend *Backend) initDB() error {
+	var err error
+	backend.Db, err = gorm.Open(sqlite.Open(backend.DbPath), &gorm.Config{
+		// TODO: Custom logger
+		Logger: nil,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = backend.Db.AutoMigrate(&model.User{}, &model.Session{}, &model.Client{}, &model.Alert{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

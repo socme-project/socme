@@ -13,6 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (b *Backend) AuthRoutes() {
+	b.Router.GET("/auth/github", b.authFunc)
+	b.Router.GET("/auth/callback", b.authCallbackFunc)
+	b.Router.GET("/auth/refresh", func(c *gin.Context) {
+		user, err := model.GetUserByToken(b.Db, c.GetHeader("Authorization"))
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "User returned", "user": user})
+	})
+}
+
 func generateState() string {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
@@ -24,7 +36,6 @@ func generateState() string {
 
 func (b *Backend) authFunc(c *gin.Context) {
 	state := generateState()
-	// TODO: Secure this cookie
 	if b.IsProd {
 		c.SetCookie("oauth_state", state, 300, "/", "", true, true)
 	} else {
@@ -103,9 +114,4 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 	b.Db.Save(&session)
 
 	c.JSON(http.StatusOK, gin.H{"token": sessionToken, "user": user})
-}
-
-func (b *Backend) AuthRoutes() {
-	b.Router.GET("/auth/github", b.authFunc)
-	b.Router.GET("/auth/callback", b.authCallbackFunc)
 }
