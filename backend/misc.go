@@ -7,6 +7,7 @@ import (
 	certfr_scrapping "github.com/socme-project/cert-fr-scrapping"
 )
 
+// MiscRoutes defines the routes for the miscellaneous functions, including the certfr route (for alerts, cti, and more)
 func (b *Backend) MiscRoutes() {
 	b.Router.GET("/certfr", b.userMiddleware, func(c *gin.Context) {
 		alerts := certfr_scrapping.CollectAlert()

@@ -1,7 +1,7 @@
 # Open-SOC Roadmap
 
 - [-] ***BUILD***
-  - [ ] Documentation
+  - [-] Documentation
   - [-] **Infrastructure**
     - [-] Configuration NixOS
       - [-] Artemis
@@ -9,7 +9,7 @@
         - [ ] Wazuh
           - [ ] Clean NixOS config
           - [ ] Update ruleset/custom ruleset (cron)
-        - [ ] Suricata
+        - [-] Suricata
         - [ ] Tailscale
         - [ ] Open-SOC Status
         - [ ] TheHive
@@ -32,7 +32,7 @@
     - [-] Open-SOC Backend (golang)
       - [X] Managing users
       - [-] Managing clients
-      - [ ] Managing alerts (cron)
+      - [-] Managing alerts (cron)
       - [X] Wazuh API
         - [X] Get alerts
         - [x] Get agents

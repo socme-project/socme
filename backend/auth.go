@@ -54,7 +54,7 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 		return
 	}
 
-	code := c.Query("code")
+	code := c.Query("code") // Get the code from github
 	token, err := b.Oauth.Cfg.Exchange(context.Background(), code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to exchange token"})
@@ -72,7 +72,7 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	var githubUser map[string]interface{}
+	var githubUser map[string]any
 	err = json.NewDecoder(resp.Body).Decode(&githubUser)
 	if err != nil {
 		c.JSON(
@@ -82,7 +82,6 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 		return
 	}
 
-	// Make the first user admin
 	var count int64
 	b.Db.Model(&model.User{}).Count(&count)
 
@@ -94,7 +93,7 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 	})
 	if user.Role == "" {
 		if count == 0 {
-			user.Role = "admin"
+			user.Role = "admin" // First user is admin
 		} else {
 			user.Role = "guest" // Default role
 		}

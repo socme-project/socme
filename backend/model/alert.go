@@ -9,7 +9,7 @@ import (
 
 type Alert struct {
 	ID       uint `gorm:"primaryKey"`
-	ClientID uint `gorm:"index"      json:"client_id"` // Foreign key for Client
+	ClientID uint `gorm:"index"      json:"client_id"`
 
 	WazuhAlertID    string    `json:"wazuh_alert_id"`
 	RuleID          string    `json:"rule_id"`
@@ -77,7 +77,7 @@ func GetAlertsByRuleLevel(db *gorm.DB, ruleLevel int) ([]Alert, error) {
 	return alerts, nil
 }
 
-func GetAlertsByFzf(db *gorm.DB, clientName, ruleDescription string) ([]Alert, error) { // TO TEST
+func GetAlertsByFzf(db *gorm.DB, clientName, ruleDescription string) ([]Alert, error) {
 	var alerts []Alert
 	db.Find(&alerts, "client_name = ? AND rule_description = ?", clientName, ruleDescription)
 	if len(alerts) == 0 {

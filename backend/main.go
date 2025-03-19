@@ -13,6 +13,7 @@ import (
 	"golang.org/x/oauth2/github"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Backend struct {
@@ -79,7 +80,7 @@ func main() {
 	}
 
 	// Start
-	err = backend.initDB()
+	err = backend.initDB(dbPath)
 	if err != nil {
 		backend.Logger.Fatal("Error while initializing the database: ", err)
 	}
@@ -106,16 +107,17 @@ func main() {
 	}
 }
 
-func (backend *Backend) initDB() error {
+func (backend *Backend) initDB(dbPath string) error {
 	var err error
-	backend.Db, err = gorm.Open(sqlite.Open(backend.DbPath), &gorm.Config{
+	backend.Db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
 		// TODO: Custom logger
-		Logger: nil,
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		return err
 	}
 
+	// Migrate the schema
 	err = backend.Db.AutoMigrate(&model.User{}, &model.Session{}, &model.Client{}, &model.Alert{})
 	if err != nil {
 		return err
