@@ -39,8 +39,7 @@ func (b *Backend) AlertRoutes() {
 		severity, _ := c.GetQuery("severity")
 		search, _ := c.GetQuery("search")
 		filter := Filter{
-			Severity: strings.Split(severity, ","), // split by comma
-
+			Severity: strings.Split(severity, ","),
 		}
 		var totalNumberOfPages int64 = 0
 		b.Db.Model(&model.Alert{}).Count(&totalNumberOfPages)
@@ -64,7 +63,7 @@ func (b *Backend) AlertRoutes() {
 		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last five alerts retrieved"})
 	})
 
-	// TODO: Filter by clientname, if clientname == all, then no filter
+	// TODO: Filter by clientname, if clientname == all, then no filter, send critical more often, then high a bit less, etc
 	b.Router.GET("/alerts/last24h/:severity", b.userMiddleware, func(c *gin.Context) {
 		severity := c.Param("severity")
 		query := b.Db.Model(&model.Alert{})
@@ -79,23 +78,25 @@ func (b *Backend) AlertRoutes() {
 			query = query.Where("rule_level >= ?", 15)
 		}
 
-		now := time.Now()
-		start := now.Add(-25 * time.Hour)
+		end := time.Now()
+		start := end.Add(-25 * time.Hour)
+		b.Logger.Info("Start: ", start, " Now: ", end) // Get the interval
 
 		var alerts []model.Alert
-		query.Where("timestamp BETWEEN ? AND ?", start, now).Find(&alerts)
+		query.Where("timestamp BETWEEN ? AND ?", start, end).Find(&alerts)
 		alertsPerHour := make([]int, 24)
 
 		for _, alert := range alerts {
-			hoursAgo := int(now.Sub(alert.Timestamp).Hours()) // Depuis combien d'heures ?
+			hoursAgo := int(end.Sub(alert.Timestamp).Hours())
 			if hoursAgo >= 0 && hoursAgo < 24 {
-				alertsPerHour[23-hoursAgo]++ // Index inversé pour le bon ordre
+				alertsPerHour[23-hoursAgo]++ // Inverted the index to have the last hour at the end
 			}
 		}
 
 		var alertsPerHour12 []int
-		for i := 0; i < 12; i++ {
-			alertsPerHour12 = append(alertsPerHour12, alertsPerHour[i*2]+alertsPerHour[(i*2)+1])
+
+		for i := 0; i < 24; i += 2 {
+			alertsPerHour12 = append(alertsPerHour12, alertsPerHour[i]+alertsPerHour[i+1])
 		}
 
 		c.JSON(
@@ -177,6 +178,7 @@ func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientID uint) error {
 	}
 
 	layout := "2006-01-02T15:04:05.000-0700"
+	b.Logger.Info("Adding alerts for client: ", client.Name)
 	for _, alert := range alerts {
 		timestamp, err := time.Parse(layout, alert.Timestamp)
 		if err != nil {
@@ -206,6 +208,7 @@ func (b Backend) GetLastAlertIdFromDb(clientID uint) (int, error) {
 		Where("client_id = ?", clientID).
 		First(&alert)
 	if result.Error != nil {
+		b.Logger.Error("Error while getting last alert ID from db: ", result.Error)
 		return 0, result.Error
 	}
 	return alert.Sort, nil
@@ -313,5 +316,3 @@ func (b Backend) SearchAlert(
 
 	return alerts, totalNumberOfPages, nil
 }
-
-// func (b Backend) SearchPaginated() {

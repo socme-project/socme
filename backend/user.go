@@ -69,7 +69,7 @@ func (b *Backend) UserRoutes() {
 			return
 		}
 
-		user, err := model.GetUserByID(b.Db, id)
+		user, err = model.GetUserByID(b.Db, strconv.FormatUint(id, 10))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return

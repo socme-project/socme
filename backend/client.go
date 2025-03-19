@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ClientRoutes defines the routes for the client, including the client list, client by ID, and new client
 func (b *Backend) ClientRoutes() {
 	b.Router.GET("/clients/list", b.userMiddleware, func(c *gin.Context) {
 		clients := model.GetAllClients(b.Db)

@@ -27,7 +27,6 @@ type Client struct {
 	IndexerPort     string
 	IndexerUsername string
 	IndexerPassword string
-	// ...
 }
 
 // TODO: We don't want all name, all chars, check IP also

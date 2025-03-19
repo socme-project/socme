@@ -39,9 +39,9 @@ func GetUserByToken(db *gorm.DB, token string) (User, error) {
 	return user, nil
 }
 
-func GetUserByID(db *gorm.DB, id string) (User, error) {
+func GetUserByID(db *gorm.DB, userID string) (User, error) {
 	var user User
-	if err := db.First(&user, id).Error; err != nil {
+	if err := db.First(&user, userID).Error; err != nil {
 		return User{}, fmt.Errorf("User not found")
 	}
 
@@ -53,8 +53,8 @@ func GetUserFromRequest(db *gorm.DB, c *gin.Context) (User, error) {
 	return GetUserByToken(db, token)
 }
 
-func UpdateUserRole(db *gorm.DB, id string, role string) error {
-	user, err := GetUserByID(db, id)
+func UpdateUserRole(db *gorm.DB, userID string, role string) error {
+	user, err := GetUserByID(db, userID)
 	if err != nil {
 		return err
 	}
