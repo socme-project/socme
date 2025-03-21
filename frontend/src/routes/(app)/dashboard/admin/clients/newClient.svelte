@@ -38,7 +38,7 @@
       return;
     }
     await axios
-      .get("/api/client/new", {
+      .post("/api/clients", {
         headers: { Authorization: localStorage.getItem("token") },
         params: {
           name: name,

@@ -7,23 +7,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ClientRoutes defines the routes for the client, including the client list, client by ID, and new client
 func (b *Backend) ClientRoutes() {
-	b.Router.GET("/clients/list", b.userMiddleware, func(c *gin.Context) {
+	// GET /clients - List all clients
+	b.Router.GET("/clients", b.userMiddleware, func(c *gin.Context) {
 		clients := model.GetAllClients(b.Db)
 		c.JSON(http.StatusOK, gin.H{"clients": clients})
 	})
 
+	// GET /client/:id - Get a client by ID
 	b.Router.GET("/client/:id", b.userMiddleware, func(c *gin.Context) {
 		id := c.Param("id")
 		client, err := model.GetClientByID(b.Db, id)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"client": client, "message": "Client retrieved"})
 	})
 
-	b.Router.GET("/client/new", b.userMiddleware, func(c *gin.Context) {
+	// POST /client - Create a new client
+	b.Router.POST("/client", b.adminMiddleware, func(c *gin.Context) {
 		err := model.NewClient(
 			b.Db,
 			c.Query("name"),
@@ -39,6 +42,7 @@ func (b *Backend) ClientRoutes() {
 		)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "Client created"})
 	})

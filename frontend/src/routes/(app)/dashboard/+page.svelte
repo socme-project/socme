@@ -16,8 +16,12 @@
 
   onMount(() => {
     axios
-      .get("/api/alerts/getlastfive", {
+      .get("/api/alerts", {
         headers: { Authorization: localStorage.getItem("token") },
+        params: {
+          page: 1,
+          perPage: 5,
+        },
       })
       .then((res) => {
         lastFiveAlerts = res.data.alerts.map((alert: any) => ({
@@ -33,7 +37,7 @@
       });
 
     axios
-      .get("/api/alerts/last24h/high", {
+      .get("/api/alerts/stats/high", {
         headers: { Authorization: localStorage.getItem("token") },
       })
       .then((res) => {
@@ -44,7 +48,7 @@
       });
 
     axios
-      .get("/api/alerts/last24h/critical", {
+      .get("/api/alerts/stats/critical", {
         headers: { Authorization: localStorage.getItem("token") },
       })
       .then((res) => {
@@ -55,7 +59,7 @@
       });
 
     axios
-      .get("/api/alerts/last24h/medium", {
+      .get("/api/alerts/stats/medium", {
         headers: { Authorization: localStorage.getItem("token") },
       })
       .then((res) => {

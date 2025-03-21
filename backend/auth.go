@@ -2,9 +2,8 @@ package main
 
 import (
 	"backend/model"
+	"backend/utils"
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,28 +13,27 @@ import (
 )
 
 func (b *Backend) AuthRoutes() {
+	// GET /auth/github - Redirect to the OAuth
 	b.Router.GET("/auth/github", b.authFunc)
+
+	// GET /auth/callback - Callback for the OAuth
 	b.Router.GET("/auth/callback", b.authCallbackFunc)
+
+	// GET /auth/refresh - Refresh the token
 	b.Router.GET("/auth/refresh", func(c *gin.Context) {
 		user, err := model.GetUserByToken(b.Db, c.GetHeader("Authorization"))
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "User returned", "user": user})
 	})
 }
 
-func generateState() string {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "default_state"
-	}
-	return base64.URLEncoding.EncodeToString(b)
-}
-
 func (b *Backend) authFunc(c *gin.Context) {
-	state := generateState()
+	state := utils.GenerateState()
+
+	// Secure the cookie if in production
 	if b.IsProd {
 		c.SetCookie("oauth_state", state, 300, "/", "", true, true)
 	} else {
@@ -50,7 +48,7 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 	storedState, err := c.Cookie("oauth_state")
 
 	if err != nil || c.Query("state") != storedState {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid state"})
 		return
 	}
 

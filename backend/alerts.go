@@ -2,7 +2,6 @@ package main
 
 import (
 	"backend/model"
-	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -11,29 +10,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lithammer/fuzzysearch/fuzzy"
-	wazuhapi "github.com/socme-project/wazuh-go"
 )
 
 func (b *Backend) AlertRoutes() {
-	b.Router.GET("/alerts/all", b.userMiddleware, func(c *gin.Context) {
-		clientIDStr := c.Query("clientID") // Get ClientID from query params
-
-		var alerts []model.Alert
-		query := b.Db.Order("timestamp DESC")
-
-		if clientIDStr != "" {
-			clientID, err := strconv.ParseUint(clientIDStr, 10, 32)
-			if err == nil {
-				query = query.Where("client_id = ?", uint(clientID))
-			}
-		}
-
-		query.Find(&alerts)
-
-		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "All alerts retrieved"})
-	})
-
-	b.Router.GET("/alerts/page", b.userMiddleware, func(c *gin.Context) {
+	// GET /alerts - List all alerts
+	b.Router.GET("/alerts", b.userMiddleware, func(c *gin.Context) {
 		perPage, _ := strconv.Atoi(c.Query("perPage"))
 		page, _ := strconv.Atoi(c.Query("page"))
 		severity, _ := c.GetQuery("severity")
@@ -41,13 +22,11 @@ func (b *Backend) AlertRoutes() {
 		filter := Filter{
 			Severity: strings.Split(severity, ","),
 		}
-		var totalNumberOfPages int64 = 0
-		b.Db.Model(&model.Alert{}).Count(&totalNumberOfPages)
-		totalNumberOfPages = totalNumberOfPages/int64(perPage) + 1
 
 		alerts, totalNumberOfPages, err := b.SearchAlert(search, filter, perPage, page)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve alerts"})
+			return
 		}
 
 		c.JSON(
@@ -56,15 +35,9 @@ func (b *Backend) AlertRoutes() {
 		)
 	})
 
-	// TODO: Filter by clientname, if clientname == all, then no filter
-	b.Router.GET("/alerts/getlastfive", b.userMiddleware, func(c *gin.Context) {
-		alerts := []model.Alert{}
-		b.Db.Order("timestamp DESC").Where("rule_level >= ?", 12).Limit(5).Find(&alerts)
-		c.JSON(http.StatusOK, gin.H{"alerts": alerts, "message": "Last five alerts retrieved"})
-	})
-
+	// GET /alerts/stats/:severity - Get stats for alerts
 	// TODO: Filter by clientname, if clientname == all, then no filter, send critical more often, then high a bit less, etc
-	b.Router.GET("/alerts/last24h/:severity", b.userMiddleware, func(c *gin.Context) {
+	b.Router.GET("/alerts/stats/:severity", b.userMiddleware, func(c *gin.Context) {
 		severity := c.Param("severity")
 		query := b.Db.Model(&model.Alert{})
 		switch severity {
@@ -80,7 +53,6 @@ func (b *Backend) AlertRoutes() {
 
 		end := time.Now()
 		start := end.Add(-25 * time.Hour)
-		b.Logger.Info("Start: ", start, " Now: ", end) // Get the interval
 
 		var alerts []model.Alert
 		query.Where("timestamp BETWEEN ? AND ?", start, end).Find(&alerts)
@@ -104,114 +76,15 @@ func (b *Backend) AlertRoutes() {
 			gin.H{"events": alertsPerHour12, "message": "Last 24h alerts retrieved"},
 		)
 	})
-	b.Router.GET("/alerts/id/:id", b.userMiddleware, func(c *gin.Context) {
+
+	// GET /alerts/:id - Get an alert by ID
+	b.Router.GET("/alerts/:id", b.userMiddleware, func(c *gin.Context) {
 		id := c.Param("id")
 		alert := model.Alert{}
 		b.Db.First(&alert, id)
+
 		c.JSON(http.StatusOK, gin.H{"alert": alert, "message": "Alert retrieved"})
 	})
-}
-
-func (b Backend) UpdateAlertsForClient(client model.Client) {
-	b.Logger.Info("-- Retrieving alerts for " + client.Name)
-	lastID, err := b.GetLastAlertIdFromDb(client.ID)
-
-	if err != nil && err.Error() == "record not found" {
-		lastID = 0
-	} else if err != nil {
-		b.Logger.Error("Failed to retrieve last alert ID from db: " + err.Error())
-		return
-	}
-	b.Logger.Info("Last ID: " + strconv.Itoa(lastID))
-
-	wazuhClient := wazuhapi.WazuhAPI{
-		Host:     client.WazuhIP,
-		Port:     client.WazuhPort,
-		Username: client.WazuhUsername,
-		Password: client.WazuhPassword,
-		Indexer: wazuhapi.Indexer{
-			Host:     client.IndexerIP,
-			Port:     client.IndexerPort,
-			Username: client.IndexerUsername,
-			Password: client.IndexerPassword,
-		},
-		Insecure: true,
-	}
-
-	if wazuhClient.RefreshToken() != nil {
-		b.Logger.Error("Failed to refresh token: " + err.Error())
-		return
-	}
-
-	alerts, _, err := wazuhClient.GetAlerts(lastID)
-	if err != nil {
-		b.Logger.Error("Failed to retrieve alerts: " + err.Error())
-		return
-	} else if len(alerts) == 0 {
-		return
-	}
-
-	err = b.AddAlertToDb(alerts, client.ID)
-	if err != nil {
-		b.Logger.Error("Failed to add alerts to db:", err)
-		return
-	}
-}
-
-func (b Backend) UpdateAlerts() {
-	b.Logger.Info("Starting alert retrieval")
-	for {
-		clients := model.GetAllClients(b.Db)
-		b.Logger.Info("Retrieving alerts for", len(clients), "clients: ", clients)
-		for _, client := range clients {
-			go b.UpdateAlertsForClient(client)
-		}
-		// Change that
-		time.Sleep(b.RefreshRate)
-	}
-}
-
-func (b Backend) AddAlertToDb(alerts []wazuhapi.Alert, clientID uint) error {
-	var client model.Client
-	if err := b.Db.First(&client, clientID).Error; err != nil {
-		return fmt.Errorf("client not found: %w", err)
-	}
-
-	layout := "2006-01-02T15:04:05.000-0700"
-	b.Logger.Info("Adding alerts for client: ", client.Name)
-	for _, alert := range alerts {
-		timestamp, err := time.Parse(layout, alert.Timestamp)
-		if err != nil {
-			return err
-		}
-
-		err = client.NewAlert(
-			b.Db,
-			alert.WazuhAlertID,
-			alert.RuleID,
-			alert.RuleDescription,
-			alert.RawJSON,
-			alert.Sort,
-			timestamp,
-			alert.RuleLevel,
-		)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (b Backend) GetLastAlertIdFromDb(clientID uint) (int, error) {
-	var alert model.Alert
-	result := b.Db.Order("timestamp DESC, sort DESC").
-		Where("client_id = ?", clientID).
-		First(&alert)
-	if result.Error != nil {
-		b.Logger.Error("Error while getting last alert ID from db: ", result.Error)
-		return 0, result.Error
-	}
-	return alert.Sort, nil
 }
 
 type Filter struct {
@@ -251,7 +124,7 @@ func (b Backend) SearchAlert(
 
 	// Add clientID filtering if you've added it to the Filter struct
 	// if filter.ClientID != nil && len(filter.ClientID) > 0 {
-	//     query = query.Where("client_id IN ?", filter.ClientID)
+	// 	query = query.Where("client_id IN ?", filter.ClientID)
 	// }
 
 	var totalNumberOfPages int64 = 0

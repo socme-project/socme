@@ -13,7 +13,7 @@
 
   onMount(async () => {
     await axios
-      .get("/api/clients/list", {
+      .get("/api/clients", {
         headers: { Authorization: localStorage.getItem("token") },
       })
       .then((res) => {
@@ -105,11 +105,10 @@
               <DropdownMenu.Content>
                 <DropdownMenu.Group>
                   <a href={"/dashboard/clients/" + client.ID}>
-                  <DropdownMenu.Item
-                  >More informations</DropdownMenu.Item>
+                    <DropdownMenu.Item>More informations</DropdownMenu.Item>
                   </a>
                   <a href={"https://" + client.WazuhIP + ":" + 443}>
-                  <DropdownMenu.Item>Open Wazuh dashboard</DropdownMenu.Item>
+                    <DropdownMenu.Item>Open Wazuh dashboard</DropdownMenu.Item>
                   </a>
                 </DropdownMenu.Group>
               </DropdownMenu.Content>

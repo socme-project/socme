@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import axios from "axios";
-    import { user } from "$lib/stores/user";
+  import { user } from "$lib/stores/user";
 
   onMount(async () => {
     const params = new URLSearchParams(window.location.search);
@@ -14,7 +14,7 @@
       goto("/auth/logout");
     }
     await axios
-      .get("/api/refreshUser", {
+      .get("/api/auth/refresh", {
         headers: { Authorization: token },
       })
       .then((res) => {
@@ -22,7 +22,7 @@
         goto(next);
       })
       .catch((error) => {
-        console.log("Error while /api/refreshUser: " + error);
+        console.log("Can't refresh user: " + error);
         goto("/auth/logout");
       });
   });

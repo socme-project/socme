@@ -13,7 +13,7 @@
 
   onMount(async () => {
     try {
-      const res = await axios.get("/api/users/list", {
+      const res = await axios.get("/api/users", {
         headers: { Authorization: localStorage.getItem("token") },
       });
       users = res.data.users;
@@ -92,11 +92,11 @@
                       onclick={() => {
                         let role = "guest";
                         axios
-                          .get("/api/user/change-role", {
+                          .patch("/api/users/" + user.ID + "/role", {
                             headers: {
                               Authorization: localStorage.getItem("token"),
                             },
-                            params: { id: user.ID, role: role },
+                            params: { role: role },
                           })
                           .then((res) => {
                             if (res.status === 200) {
@@ -116,11 +116,11 @@
                       onclick={() => {
                         let role = "user";
                         axios
-                          .get("/api/user/change-role", {
+                          .patch("/api/users/" + user.ID + "/role", {
                             headers: {
                               Authorization: localStorage.getItem("token"),
                             },
-                            params: { id: user.ID, role: role },
+                            params: { role: role },
                           })
                           .then((res) => {
                             if (res.status === 200) {
@@ -140,11 +140,11 @@
                       onclick={() => {
                         let role = "admin";
                         axios
-                          .get("/api/user/change-role", {
+                          .get("/api/users/" + user.ID + "/role", {
                             headers: {
                               Authorization: localStorage.getItem("token"),
                             },
-                            params: { id: user.ID, role: role },
+                            params: { role: role },
                           })
                           .then((res) => {
                             if (res.status === 200) {
@@ -163,11 +163,10 @@
                   <DropdownMenu.Item
                     onclick={() => {
                       axios
-                        .get("/api/user/revoke-session", {
+                        .delete("/api/users/" + user.ID + "/session", {
                           headers: {
                             Authorization: localStorage.getItem("token"),
                           },
-                          params: { id: user.ID },
                         })
                         .then((res) => {
                           if (res.status === 200) {
@@ -186,11 +185,10 @@
                   <DropdownMenu.Item
                     onclick={() => {
                       axios
-                        .get("/api/user/delete", {
+                        .get("/api/users/" + user.ID + "/delete", {
                           headers: {
                             Authorization: localStorage.getItem("token"),
                           },
-                          params: { id: user.ID },
                         })
                         .then((res) => {
                           if (res.status === 200) {

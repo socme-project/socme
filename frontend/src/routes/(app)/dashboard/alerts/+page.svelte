@@ -32,7 +32,7 @@
 
   $effect(() => {
     axios
-      .get("/api/alerts/page", {
+      .get("/api/alerts", {
         headers: { Authorization: localStorage.getItem("token") },
         params: {
           page: currentPage,

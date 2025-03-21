@@ -14,7 +14,7 @@
 
   onMount(async () => {
     await axios
-      .get("/api/clients/list", {
+      .get("/api/clients", {
         headers: { Authorization: localStorage.getItem("token") },
       })
       .then((res) => {

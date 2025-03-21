@@ -9,12 +9,14 @@ import (
 )
 
 func (b *Backend) UserRoutes() {
+	// GET /users - List all users
 	b.Router.GET("/users", b.adminMiddleware, func(c *gin.Context) {
 		users := []model.User{}
 		b.Db.Find(&users)
 		c.JSON(http.StatusOK, gin.H{"users": users, "message": "List of users returned"})
 	})
 
+	// PATCH /users/:id/role - Update a user's role
 	b.Router.PATCH("/users/:id/role", b.adminMiddleware, func(c *gin.Context) {
 		id := c.Param("id")
 		newRole := c.Query("role")
@@ -26,6 +28,7 @@ func (b *Backend) UserRoutes() {
 		c.JSON(http.StatusOK, gin.H{"message": "Role updated"})
 	})
 
+	// DELETE /users/:id/session - Revoke a user's session
 	b.Router.DELETE("/users/:id/session", func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 		if err != nil {
@@ -53,6 +56,7 @@ func (b *Backend) UserRoutes() {
 		c.JSON(http.StatusOK, gin.H{"message": "Session revoked"})
 	})
 
+	// DELETE /users/:id - Delete a user
 	b.Router.DELETE("/users/:id", func(c *gin.Context) {
 		id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 		if err != nil {

@@ -10,7 +10,7 @@
 
   $effect(() => {
     axios
-      .get("/api/client/" + id, {
+      .get("/api/clients/" + id, {
         headers: { Authorization: localStorage.getItem("token") },
       })
       .then((res) => {
