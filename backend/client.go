@@ -19,10 +19,13 @@ func (b *Backend) ClientRoutes() {
 		id := c.Param("id")
 		client, err := model.GetClientByID(b.Db, id)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"message": "Client not found.", "error": err.Error()},
+			)
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"client": client, "message": "Client retrieved"})
+		c.JSON(http.StatusOK, gin.H{"client": client, "message": "Client retrieved."})
 	})
 
 	// POST /client - Create a new client
@@ -41,9 +44,12 @@ func (b *Backend) ClientRoutes() {
 			c.Query("indexerPassword"),
 		)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"message": "Error while creating the client.", "error": err.Error()},
+			)
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Client created"})
+		c.JSON(http.StatusOK, gin.H{"message": "Client created."})
 	})
 }

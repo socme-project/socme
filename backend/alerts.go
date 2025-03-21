@@ -25,13 +25,16 @@ func (b *Backend) AlertRoutes() {
 
 		alerts, totalNumberOfPages, err := b.SearchAlert(search, filter, perPage, page)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve alerts"})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"message": "Failed to retrieve alerts.", "error": err.Error()},
+			)
 			return
 		}
 
 		c.JSON(
 			http.StatusOK,
-			gin.H{"alerts": alerts, "maxPage": totalNumberOfPages, "message": "Page retrieved"},
+			gin.H{"alerts": alerts, "maxPage": totalNumberOfPages, "message": "Alerts retrieved."},
 		)
 	})
 
@@ -73,7 +76,7 @@ func (b *Backend) AlertRoutes() {
 
 		c.JSON(
 			http.StatusOK,
-			gin.H{"events": alertsPerHour12, "message": "Last 24h alerts retrieved"},
+			gin.H{"events": alertsPerHour12, "message": "Stats retrieved."},
 		)
 	})
 
@@ -81,9 +84,13 @@ func (b *Backend) AlertRoutes() {
 	b.Router.GET("/alerts/:id", b.userMiddleware, func(c *gin.Context) {
 		id := c.Param("id")
 		alert := model.Alert{}
-		b.Db.First(&alert, id)
 
-		c.JSON(http.StatusOK, gin.H{"alert": alert, "message": "Alert retrieved"})
+		if err := b.Db.First(&alert, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "Alert not found."})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"alert": alert, "message": "Alert retrieved."})
 	})
 }
 

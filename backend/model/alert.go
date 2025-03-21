@@ -40,59 +40,13 @@ func (c *Client) NewAlert(
 		RawJSON:         rawJSON,
 		Sort:            sort,
 	}
-	// Assign tags
+
+	// TODO: Assign tags here
 
 	result := db.Create(&alert)
 	if result.Error != nil {
-		return fmt.Errorf("Error while creating the alert")
+		return fmt.Errorf("Error while creating the alert.")
 	}
 
 	return nil
-}
-
-func GetAllAlerts(db *gorm.DB) []Alert {
-	var alerts []Alert
-	db.Find(&alerts)
-
-	return alerts
-}
-
-func GetAlertsByClient(db *gorm.DB, clientName string) ([]Alert, error) {
-	var alerts []Alert
-	db.Find(&alerts, "client_name = ?", clientName)
-	if len(alerts) == 0 {
-		return nil, fmt.Errorf("No alerts found for this client")
-	}
-
-	return alerts, nil
-}
-
-func GetAlertsByRuleLevel(db *gorm.DB, ruleLevel int) ([]Alert, error) {
-	var alerts []Alert
-	db.Find(&alerts, "rule_level = ?", ruleLevel)
-	if len(alerts) == 0 {
-		return nil, fmt.Errorf("No alerts found for this rule level")
-	}
-
-	return alerts, nil
-}
-
-func GetAlertsByFzf(db *gorm.DB, clientName, ruleDescription string) ([]Alert, error) {
-	var alerts []Alert
-	db.Find(&alerts, "client_name = ? AND rule_description = ?", clientName, ruleDescription)
-	if len(alerts) == 0 {
-		return nil, fmt.Errorf("No alerts found for this client and rule description")
-	}
-
-	return alerts, nil
-}
-
-func GetAllPagniatedAlerts(db *gorm.DB, perPage, page int) ([]Alert, int) {
-	var alerts []Alert
-	db.Limit(perPage).Offset(page * perPage).Find(&alerts)
-
-	var total int64
-	db.Model(&Alert{}).Count(&total)
-
-	return alerts, int(total)
 }

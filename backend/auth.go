@@ -23,10 +23,10 @@ func (b *Backend) AuthRoutes() {
 	b.Router.GET("/auth/refresh", func(c *gin.Context) {
 		user, err := model.GetUserByToken(b.Db, c.GetHeader("Authorization"))
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized.", "error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "User returned", "user": user})
+		c.JSON(http.StatusOK, gin.H{"message": "User returned.", "user": user})
 	})
 }
 
@@ -48,14 +48,17 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 	storedState, err := c.Cookie("oauth_state")
 
 	if err != nil || c.Query("state") != storedState {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid state"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid state.", "error": err.Error()})
 		return
 	}
 
 	code := c.Query("code") // Get the code from github
 	token, err := b.Oauth.Cfg.Exchange(context.Background(), code)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to exchange token"})
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{"message": "Failed to exchange token.", "error": err.Error()},
+		)
 		return
 	}
 
@@ -64,7 +67,7 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
-			gin.H{"message": "Failed to get user from Github"},
+			gin.H{"message": "Failed to get user from Github.", "error": err.Error()},
 		)
 		return
 	}
@@ -75,7 +78,7 @@ func (b *Backend) authCallbackFunc(c *gin.Context) {
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
-			gin.H{"message": "Failed to decode the answer from Github"},
+			gin.H{"message": "Failed to decode the answer from Github.", "error": err.Error()},
 		)
 		return
 	}

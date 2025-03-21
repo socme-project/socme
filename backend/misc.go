@@ -15,7 +15,12 @@ func (b *Backend) MiscRoutes() {
 		avis := certfr_scrapping.CollectAvis()
 		c.JSON(
 			http.StatusOK,
-			gin.H{"alerts": alerts, "cti": cti, "avis": avis, "message": "List of alerts returned"},
+			gin.H{
+				"alerts":  alerts,
+				"cti":     cti,
+				"avis":    avis,
+				"message": "List of alerts returned.",
+			},
 		)
 	})
 }
