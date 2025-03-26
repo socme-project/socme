@@ -3,12 +3,14 @@ module backend
 go 1.23.6
 
 require (
+	github.com/charmbracelet/log v0.4.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/hibare/headscale-client-go v0.1.1-0.20250222111302-3e52b94d7d4c
 	github.com/joho/godotenv v1.5.1
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/socme-project/cert-fr-scrapping v0.0.0-20250311143456-90427564d69e
 	github.com/socme-project/wazuh-go v0.1.0
+	golang.org/x/crypto v0.36.0
 	golang.org/x/net v0.37.0
 	golang.org/x/oauth2 v0.27.0
 	gorm.io/driver/sqlite v1.5.7
@@ -25,7 +27,6 @@ require (
 	github.com/bytedance/sonic v1.12.9 // indirect
 	github.com/bytedance/sonic/loader v0.2.3 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
-	github.com/charmbracelet/log v0.4.1 // indirect
 	github.com/charmbracelet/x/ansi v0.4.2 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -62,7 +63,6 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	golang.org/x/arch v0.14.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
