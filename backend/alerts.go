@@ -39,7 +39,7 @@ func (b *Backend) AlertRoutes() {
 	})
 
 	// GET /alerts/stats/:severity - Get stats for alerts
-	// TODO: Filter by clientname, if clientname == all, then no filter, send critical more often, then high a bit less, etc
+	// TODO:  send critical more often, then high a bit less, etc
 	b.Router.GET("/alerts/stats/:severity", b.userMiddleware, func(c *gin.Context) {
 		severity := c.Param("severity")
 		query := b.Db.Model(&model.Alert{})
