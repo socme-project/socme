@@ -15,7 +15,10 @@ func main() {
 		fmt.Println("Error loading .env file in the root folder: ", err)
 		return
 	}
-	db, err := gorm.Open(sqlite.Open("../backend.db"), &gorm.Config{}) //pas fou, il faudrait plutot faire une API qui retourne les IP etc, soit
+	db, err := gorm.Open(
+		sqlite.Open("../backend.db"),
+		&gorm.Config{},
+	) // pas fou, il faudrait plutot faire une API qui retourne les IP etc, soit
 	if err != nil {
 		log.Fatal("Error connecting to database:", err)
 		return
@@ -26,7 +29,7 @@ func main() {
 		log.Fatal("Error getting clients:", err)
 	}
 
-	results := SendAll(clients, "uptime")
+	results := SendCommand("uptime", clients...)
 	for name, output := range results {
 		fmt.Printf("[%s] %s\n", name, output)
 	}
