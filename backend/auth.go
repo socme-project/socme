@@ -93,7 +93,7 @@ func (b *Backend) GithubCallback(c *gin.Context) {
 	var user model.User
 	// Ensure your model.User supports GitHubID, Username, Avatar, etc.
 	b.Db.FirstOrCreate(&user, model.User{
-		GitHubID: fmt.Sprintf("%.0f", githubUser["id"].(float64)),
+		GitHubID: json.Number(fmt.Sprintf("%.0f", githubUser["id"].(float64))).String(),
 		Username: githubUser["login"].(string),
 		Avatar:   githubUser["avatar_url"].(string),
 	})
@@ -188,7 +188,6 @@ func (b *Backend) GoogleCallback(c *gin.Context) {
 	b.Db.Model(&model.User{}).Count(&count)
 
 	var user model.User
-	// Ensure your model.User supports GoogleID (and/or any other fields you want to store).
 	b.Db.FirstOrCreate(&user, model.User{
 		GoogleID: googleID,
 		Username: username,
