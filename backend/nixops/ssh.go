@@ -9,13 +9,17 @@ import (
 )
 
 func loadSSHKey() (ssh.Signer, error) {
-	privateKeyPath := os.Getenv("NIXOPS_SSH_KEY_PATH")
+	//ask for base64 of key
+
+	privateKeyB64 := os.Getenv("NIXOPS_SSH_KEY_BASE64")
+	// decode
 	key, err := ssh.ParsePrivateKey([]byte(privateKeyPath))
-	if err != nil {
-		return nil, fmt.Errorf("Error parsing private key: %s", err)
-	}
-	return key, nil
+	return key, err
 }
+
+// Do the same than SendOne without loading the key
+// del sendone except loadKey, same for sendall
+func send(...) {}
 
 func SendOne(client model.Client, command string) (string, error) {
 	key, err := loadSSHKey()
@@ -28,8 +32,8 @@ func SendOne(client model.Client, command string) (string, error) {
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(key),
 		},
-		Timeout:         0, //to adjust
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         0,                           //to adjust
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // TODO: test without
 	}
 
 	conn, err := ssh.Dial("tcp", client.IndexerIP+":22", config)
@@ -60,3 +64,25 @@ func SendAll(clients []model.Client, command string) map[string]string {
 	}
 	return results
 }
+
+// TODO: NixOS rebuild switch...
+
+// TODO: Git pull (automatically git stash git pull git unstash)
+
+// TODO: Reboot
+
+// TODO: OpenStatus (fastfetch)
+
+// test("", "", "")
+// test("")
+// Instead of One, ALl:
+func Send(command string, client ...model.Client) {
+}
+
+func Reboot(clients ...model.Client) {
+	Send("reboot", clients...)
+}
+
+// ok := []string{"One", "Two"}
+// x  test(ok)
+// v  test(ok...)

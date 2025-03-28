@@ -15,7 +15,7 @@ func main() {
 		fmt.Println("Error loading .env file in the root folder: ", err)
 		return
 	}
-	db, err := gorm.Open(sqlite.Open("../backend.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("../backend.db"), &gorm.Config{}) //pas fou, il faudrait plutot faire une API qui retourne les IP etc, soit
 	if err != nil {
 		log.Fatal("Error connecting to database:", err)
 		return
