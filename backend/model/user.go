@@ -12,6 +12,7 @@ import (
 type User struct {
 	ID       uint   `gorm:"primaryKey"`
 	GitHubID string `gorm:"uniqueIndex"`
+	GoogleID string `gorm:"uniqueIndex"`
 	Username string
 	Avatar   string
 	Role     string

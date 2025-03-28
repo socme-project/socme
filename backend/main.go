@@ -30,7 +30,8 @@ type Oauth struct {
 	ClientID     string
 	ClientSecret string
 	RedirectURL  string
-	Cfg          *oauth2.Config
+	GitHubCfg    *oauth2.Config
+	GoogleCfg    *oauth2.Config
 }
 
 func main() {
@@ -56,18 +57,24 @@ func main() {
 			Prefix:          "SOCme",
 		}),
 		Oauth: Oauth{
-			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
-			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
-			RedirectURL:  os.Getenv("GITHUB_REDIRECT_URL"),
+			GitHubCfg: &oauth2.Config{
+				ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+				ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
+				RedirectURL:  os.Getenv("GITHUB_REDIRECT_URL"),
+				Scopes:       []string{"user:email"},
+				Endpoint:     github.Endpoint,
+			},
+			GoogleCfg: &oauth2.Config{
+				ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+				ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+				RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
+				Scopes:       []string{"openid", "profile", "email"},
+				Endpoint: oauth2.Endpoint{
+					AuthURL:  "https://accounts.google.com/o/oauth2/auth",
+					TokenURL: "https://oauth2.googleapis.com/token",
+				},
+			},
 		},
-	}
-
-	backend.Oauth.Cfg = &oauth2.Config{
-		ClientID:     backend.Oauth.ClientID,
-		ClientSecret: backend.Oauth.ClientSecret,
-		RedirectURL:  backend.Oauth.RedirectURL,
-		Scopes:       []string{"user:email"},
-		Endpoint:     github.Endpoint,
 	}
 
 	// Default values
