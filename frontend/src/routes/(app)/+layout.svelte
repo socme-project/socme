@@ -17,7 +17,7 @@
       await goto("/");
     }
     await axios
-      .get("/api/refresh", {
+      .get("/api/auth/refresh", {
         headers: { Authorization: token },
       })
       .then((res) => {

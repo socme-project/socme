@@ -21,7 +21,6 @@ func (b *Backend) AuthRoutes() {
 	auth.GET("/google/login", b.GoogleLogin)
 	auth.GET("/google/callback", b.GoogleCallback)
 
-	// Refresh endpoint
 	auth.GET("/refresh", func(c *gin.Context) {
 		user, err := model.GetUserByToken(b.Db, c.GetHeader("Authorization"))
 		if err != nil {
@@ -35,7 +34,6 @@ func (b *Backend) AuthRoutes() {
 // GithubLogin initiates the GitHub OAuth flow.
 func (b *Backend) GithubLogin(c *gin.Context) {
 	state := utils.GenerateState()
-	// Use a provider-specific cookie key
 	if b.IsProd {
 		c.SetCookie("oauth_state_github", state, 300, "/", "", true, true)
 	} else {
@@ -45,6 +43,19 @@ func (b *Backend) GithubLogin(c *gin.Context) {
 	c.Redirect(http.StatusFound, url)
 }
 
+// GoogleLogin initiates the Google OAuth flow.
+func (b *Backend) GoogleLogin(c *gin.Context) {
+	state := utils.GenerateState()
+	if b.IsProd {
+		c.SetCookie("oauth_state_google", state, 300, "/", "", true, true)
+	} else {
+		c.SetCookie("oauth_state_google", state, 300, "/", "", false, true)
+	}
+	url := b.Oauth.GoogleCfg.AuthCodeURL(state, oauth2.AccessTypeOffline)
+	c.Redirect(http.StatusFound, url)
+}
+
+// GithubCallback handles GitHub OAuth callback.
 func (b *Backend) GithubCallback(c *gin.Context) {
 	storedState, err := c.Cookie("oauth_state_github")
 	if err != nil || c.Query("state") != storedState {
@@ -86,22 +97,30 @@ func (b *Backend) GithubCallback(c *gin.Context) {
 		return
 	}
 
-	// Create or update the user.
-	var count int64
-	b.Db.Model(&model.User{}).Count(&count)
+	githubID := json.Number(fmt.Sprintf("%.0f", githubUser["id"].(float64))).String()
+	username := githubUser["login"].(string)
+
+	// Check if a user with this username exists but doesn't have a GitHub ID.
+	var existingUser model.User
+	if err := b.Db.Where("username = ? AND github_id IS NULL", username).First(&existingUser).Error; err == nil {
+		username += " (github)"
+	}
 
 	var user model.User
-	// Ensure your model.User supports GitHubID, Username, Avatar, etc.
 	b.Db.FirstOrCreate(&user, model.User{
-		GitHubID: json.Number(fmt.Sprintf("%.0f", githubUser["id"].(float64))).String(),
-		Username: githubUser["login"].(string),
+		GitHubID: githubID,
+		Username: username,
 		Avatar:   githubUser["avatar_url"].(string),
 	})
+
+	// Set role if not already assigned.
+	var count int64
+	b.Db.Model(&model.User{}).Count(&count)
 	if user.Role == "" {
 		if count == 0 {
-			user.Role = "admin" // First user is admin
+			user.Role = "admin"
 		} else {
-			user.Role = "guest" // Default role
+			user.Role = "guest"
 		}
 	}
 	b.Db.Save(&user)
@@ -112,7 +131,6 @@ func (b *Backend) GithubCallback(c *gin.Context) {
 		ID:        user.ID,
 		ExpiresAt: time.Now().Add(10 * time.Hour),
 	}
-	// Update or create the session.
 	if b.Db.Model(&session).Where("id = ?", user.ID).Updates(&user).RowsAffected == 0 {
 		b.Db.Create(&session)
 	}
@@ -121,18 +139,7 @@ func (b *Backend) GithubCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": sessionToken, "user": user})
 }
 
-// GoogleLogin initiates the Google OAuth flow.
-func (b *Backend) GoogleLogin(c *gin.Context) {
-	state := utils.GenerateState()
-	if b.IsProd {
-		c.SetCookie("oauth_state_google", state, 300, "/", "", true, true)
-	} else {
-		c.SetCookie("oauth_state_google", state, 300, "/", "", false, true)
-	}
-	url := b.Oauth.GoogleCfg.AuthCodeURL(state, oauth2.AccessTypeOffline)
-	c.Redirect(http.StatusFound, url)
-}
-
+// GoogleCallback handles Google OAuth callback.
 func (b *Backend) GoogleCallback(c *gin.Context) {
 	storedState, err := c.Cookie("oauth_state_google")
 	if err != nil || c.Query("state") != storedState {
@@ -174,7 +181,7 @@ func (b *Backend) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	// Extract necessary information from the Google user response.
+	// Extract necessary information from the Google response.
 	googleID, ok := googleUser["sub"].(string)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Invalid Google user ID"})
@@ -183,9 +190,11 @@ func (b *Backend) GoogleCallback(c *gin.Context) {
 	username, _ := googleUser["name"].(string)
 	avatar, _ := googleUser["picture"].(string)
 
-	// Create or update the user.
-	var count int64
-	b.Db.Model(&model.User{}).Count(&count)
+	// Check if a user with this username exists but doesn't have a Google ID.
+	var existingUser model.User
+	if err := b.Db.Where("username = ? AND google_id IS NULL", username).First(&existingUser).Error; err == nil {
+		username += " (google)"
+	}
 
 	var user model.User
 	b.Db.FirstOrCreate(&user, model.User{
@@ -193,11 +202,15 @@ func (b *Backend) GoogleCallback(c *gin.Context) {
 		Username: username,
 		Avatar:   avatar,
 	})
+
+	// Set role if not already assigned.
+	var count int64
+	b.Db.Model(&model.User{}).Count(&count)
 	if user.Role == "" {
 		if count == 0 {
-			user.Role = "admin" // First user is admin
+			user.Role = "admin"
 		} else {
-			user.Role = "guest" // Default role
+			user.Role = "guest"
 		}
 	}
 	b.Db.Save(&user)
@@ -208,7 +221,6 @@ func (b *Backend) GoogleCallback(c *gin.Context) {
 		ID:        user.ID,
 		ExpiresAt: time.Now().Add(10 * time.Hour),
 	}
-	// Update or create the session.
 	if b.Db.Model(&session).Where("id = ?", user.ID).Updates(&user).RowsAffected == 0 {
 		b.Db.Create(&session)
 	}
