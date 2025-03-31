@@ -22,7 +22,7 @@ func (b *Backend) AuthRoutes() {
 	auth.GET("/google/callback", b.GoogleCallback)
 
 	// Refresh endpoint
-	b.Router.GET("/auth/refresh", func(c *gin.Context) {
+	auth.GET("/refresh", func(c *gin.Context) {
 		user, err := model.GetUserByToken(b.Db, c.GetHeader("Authorization"))
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized.", "error": err.Error()})

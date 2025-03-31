@@ -10,10 +10,10 @@ import (
 )
 
 type User struct {
-	ID       uint   `gorm:"primaryKey"`
-	GitHubID string `gorm:"uniqueIndex"`
-	GoogleID string `gorm:"uniqueIndex"`
-	Username string
+	ID       uint `gorm:"primaryKey"`
+	GitHubID string
+	GoogleID string
+	Username string `gorm:"uniqueIndex"`
 	Avatar   string
 	Role     string
 }
