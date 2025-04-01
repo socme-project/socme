@@ -22,7 +22,7 @@
         localStorage.setItem("token", res.data.token);
         user.set(res.data.user);
         toast.success("Authenticated successfully.");
-        goto("/dashboard");
+        goto("/auth/change-name"); // Redirect to the welcome page
       })
       .catch((error) => {
         console.error("Failed to authenticate:", error);
