@@ -1,0 +1,39 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": null,
+  "display": {
+    "pipe": true,
+  },
+  "modules": [
+    "title",
+    "separator",
+    "break",
+    "os",
+    "host",
+    "kernel",
+    "cpu",
+    "gpu",
+
+    "break",
+
+    "localip",
+    "uptime",
+
+    "break",
+
+    "disk",
+    "memory",
+    "swap",
+    "CPUUsage",
+    {
+      "type": "command",
+      "key":"Flake Version",
+      "text": "cd /etc/nixos && git describe --tags"
+    },
+    {
+      "type": "command",
+      "key":"Wazuh Version",
+      "text": "cat /etc/wazuh/docker-compose.yml | grep image | head -n1 | cut -d':' -f3"
+    }
+  ]
+}

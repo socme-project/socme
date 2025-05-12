@@ -1,0 +1,13 @@
+Host zeus
+  User zeus
+  Port 22
+  Hostname 10.8.178.20
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/socme
+
+Host artemis
+  User zeus
+  Port 2002
+  Hostname 10.8.178.20
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/socme
