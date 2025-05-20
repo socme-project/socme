@@ -1,4 +1,4 @@
-# Open-SOC Roadmap
+# SOCme Roadmap
 
 ## Organization
 
