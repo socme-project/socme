@@ -8,7 +8,7 @@
 - When a user is created using OAuth, we gave him the "guest" role, it can't do anything.
 - An admin can change the role of a user to "user" or "admin"
 
-## Path
+## Paths
 
 | **Category**  | **Method** | **Path**                          | **Description**                                      | **Permissions** |
 |--------------|----------|--------------------------------|--------------------------------------------------|----------------|
