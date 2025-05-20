@@ -132,7 +132,7 @@ Un calculateur de stockage/puissance nécessaire pour les clients en fonction de
 
 ### Build
 
-Lors de l'arrivé chez un client:
+Lors de l'arrivée chez un client:
 
 - Création du client sur Zeus pour obtenir un token (headscale)
 - Installation de la machine sur le réseau
