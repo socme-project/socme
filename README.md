@@ -14,7 +14,7 @@ Les principales missions d’un SOC sont :
 - Threat intelligence et huntings pour identifier des menaces avancées
 - Amélioration continue via des simulations et analyses post-mortem
 
-Un **SOCme** est une version open-source d'un SOC qui vise à offrir des solutions accessibles pour la détection et la réponse aux menaces. Il permet aux entreprises et aux chercheurs de mettre en place une infrastructure de sécurité sans coûts de licence élevés.
+**SOCme** est une version open-source d'un SOC qui vise à offrir des solutions accessibles pour la détection et la réponse aux menaces. Il permet à tous de mettre en place une infrastructure de sécurité sans coûts de licence élevés.
 
 ### Le projet
 

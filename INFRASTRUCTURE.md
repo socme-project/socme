@@ -32,3 +32,7 @@ Artemis:
 
 - usr: zeus
 - pass: secret
+
+## Todo
+
+- Choisir hardware pour artemis
