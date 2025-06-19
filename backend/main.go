@@ -51,10 +51,14 @@ type Oauth struct {
 }
 
 func main() {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		fmt.Println("Error loading .env file in the root folder: ", err)
-		os.Exit(1)
+	isProd := os.Getenv("IS_PROD") == "true"
+
+	if !isProd {
+		err := godotenv.Load("../.env")
+		if err != nil && !os.IsNotExist(err) {
+			fmt.Println("Error loading .env file in the root folder: ", err)
+			os.Exit(1)
+		}
 	}
 
 	dbPath := os.Getenv("DB_PATH")
@@ -62,10 +66,14 @@ func main() {
 		dbPath = "data.db"
 	}
 
-	interval, _ := time.ParseDuration(os.Getenv("ALERT_RETRIEVAL_INTERVAL"))
+	interval, err := time.ParseDuration(os.Getenv("ALERT_RETRIEVAL_INTERVAL"))
+	if err != nil {
+		interval = 5 * time.Minute
+	}
+
 	backend := Backend{
 		Port:        os.Getenv("BACKEND_PORT"),
-		IsProd:      os.Getenv("IS_PROD") == "true",
+		IsProd:      isProd,
 		RefreshRate: interval,
 		Logger: log.NewWithOptions(os.Stderr, log.Options{
 			ReportCaller:    true,
@@ -87,7 +95,6 @@ func main() {
 		Endpoint:     github.Endpoint,
 	}
 
-	// Default values
 	if backend.Port == "" {
 		backend.Port = "8080"
 	}
@@ -96,7 +103,6 @@ func main() {
 		backend.RefreshRate = 5 * time.Minute
 	}
 
-	// Start
 	err = backend.initDB(dbPath)
 	if err != nil {
 		backend.Logger.Fatal("Error while initializing the database: ", err)
@@ -104,6 +110,8 @@ func main() {
 
 	if backend.IsProd {
 		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
 	}
 	backend.Router = gin.Default()
 
@@ -118,7 +126,6 @@ func main() {
 	backend.Logger.Info("Starting UpdateAlerts loop")
 	go backend.UpdateAlerts()
 
-	// Starting infinite loop to retrieve alerts from Wazuh API
 	backend.Logger.Info("Server is launched at http://localhost:" + backend.Port)
 	err = backend.Router.Run(":" + backend.Port)
 	if err != nil {
@@ -128,15 +135,14 @@ func main() {
 
 func (backend *Backend) initDB(dbPath string) error {
 	var err error
+	// TODO: Add custom logger
 	backend.Db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-		// TODO: Custom logger
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		return err
 	}
 
-	// Migrate the schema
 	err = backend.Db.AutoMigrate(&model.User{}, &model.Session{}, &model.Client{}, &model.Alert{})
 	if err != nil {
 		return err
