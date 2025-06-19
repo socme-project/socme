@@ -37,8 +37,8 @@
               "Group under which the SOCme backend service will run.";
           };
           dbPath = lib.mkOption {
-            type = lib.types.path;
-            default = /var/lib/socme-backend/socme.db;
+            type = lib.types.str;
+            default = "/var/lib/socme-backend/socme.db";
             description =
               "Path to the database used by the SOCme backend service.";
           };
