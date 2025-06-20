@@ -20,7 +20,7 @@
           vendorHash = "";
           nativeBuildInputs = [ pkgs.pnpm pkgs.typescript ];
           buildPhase = ''
-            pnpm run build
+            bun dev
           '';
 
           installPhase = ''
