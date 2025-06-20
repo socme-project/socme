@@ -12,6 +12,23 @@
         (system: f system (import nixpkgs { inherit system; }));
     in {
       packages = forAllSystems (system: pkgs: {
+        # TODO: adjust frontend for bun
+        socme-frontend = pkgs.buildNpmPackage {
+          pname = "socme-frontend";
+          version = "0.1.0";
+          src = ./frontend;
+          vendorHash = "";
+          nativeBuildInputs = [ pkgs.pnpm pkgs.typescript ];
+          buildPhase = ''
+            pnpm run build
+          '';
+
+          installPhase = ''
+            mkdir -p $out/share/socme-frontend
+            cp -r dist/* $out/share/socme-frontend/
+          '';
+        };
+
         socme-backend = pkgs.buildGoModule {
           pname = "socme-backend";
           version = "0.1.0";
