@@ -57,7 +57,6 @@ func main() {
 		err := godotenv.Load("../.env")
 		if err != nil && !os.IsNotExist(err) {
 			fmt.Println("Error loading .env file in the root folder: ", err)
-			os.Exit(1)
 		}
 	}
 

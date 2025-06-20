@@ -5,16 +5,20 @@
 
   outputs = { self, nixpkgs, ... }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
-      socmeBackendPackage = pkgs.buildGoModule {
-        pname = "socme-backend";
-        version = "0.1.0";
-        src = ./backend;
-        vendorHash = "sha256-axt8YiVCGHnlXh174vUEKjCVWrR5YXYT+JPaNkQrE+0=";
-      };
+      supportedSystems =
+        [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forAllSystems = f:
+        nixpkgs.lib.genAttrs supportedSystems
+        (system: f system (import nixpkgs { inherit system; }));
     in {
-      packages.${system}.socme-backend = socmeBackendPackage;
+      packages = forAllSystems (system: pkgs: {
+        socme-backend = pkgs.buildGoModule {
+          pname = "socme-backend";
+          version = "0.1.0";
+          src = ./backend;
+          vendorHash = "sha256-axt8YiVCGHnlXh174vUEKjCVWrR5YXYT+JPaNkQrE+0=";
+        };
+      });
 
       nixosModules.socme-backend = { config, lib, pkgs, ... }: {
         options.services.socme-backend = {
@@ -64,6 +68,12 @@
             default = "";
             description = "Redirect URL for GitHub OAuth in SOCme backend.";
           };
+          developmentMode = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description =
+              "Enable development mode for the SOCme backend service.";
+          };
         };
         config = lib.mkIf config.services.socme-backend.enable {
           systemd.services.socme-backend = {
@@ -71,7 +81,8 @@
             after = [ "network.target" ];
             wantedBy = [ "multi-user.target" ];
             serviceConfig = {
-              ExecStart = "${socmeBackendPackage}/bin/backend";
+              ExecStart =
+                "${self.packages.${pkgs.system}.socme-backend}/bin/backend";
               Restart = "always";
               User = config.services.socme-backend.user;
               Group = config.services.socme-backend.group;
@@ -80,7 +91,12 @@
               ReadWritePaths = [ "/var/lib/socme-backend" ];
               Environment = [
                 "BACKEND_PORT=${toString config.services.socme-backend.port}"
-                "IS_PROD=true"
+                "IS_PROD=${
+                  if config.services.socme-backend.developmentMode then
+                    "false"
+                  else
+                    "true"
+                }"
                 "DB_PATH=${config.services.socme-backend.dbPath}"
                 "ALERT_RETRIEVAL_INTERVAL=${config.services.socme-backend.alertRetrievalInterval}"
                 "GITHUB_CLIENT_ID=${config.services.socme-backend.githubClientId}"
