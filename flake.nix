@@ -1,17 +1,15 @@
 {
   description = "Flake for SOCme";
 
-  inputs = { nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; };
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    systems.url = "github:nix-systems/default";
+  };
 
-  outputs = { self, nixpkgs, ... }:
-    let
-      supportedSystems =
-        [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      forAllSystems = f:
-        nixpkgs.lib.genAttrs supportedSystems
-        (system: f system (import nixpkgs { inherit system; }));
+  outputs = { systems, self, nixpkgs, ... }:
+    let eachSystem = nixpkgs.lib.genAttrs (import systems);
     in {
-      packages = forAllSystems (system: pkgs: {
+      packages = eachSystem (system: pkgs: {
         # TODO: adjust frontend for bun
         socme-frontend = pkgs.buildNpmPackage {
           pname = "socme-frontend";
