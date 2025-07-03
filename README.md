@@ -48,15 +48,12 @@ centralisé.
 ### Composants
 
 - **Core** :
-
   - Cerveau de SOCme : gestion des utilisateurs, clients, nœuds, notifications,
     visualisation des alertes...
 - **Node** :
-
   - Installé chez chaque client, surveille réseau, logs, fichiers, etc.
   - Utilise principalement Wazuh & Suricata
 - **Screen** :
-
   - Affichage simplifié des alertes sur un écran (ex : Raspberry Pi)
 
 Les composants communiquent via un réseau [Tailnet](https://tailscale.com/).
@@ -71,14 +68,12 @@ Les composants communiquent via un réseau [Tailnet](https://tailscale.com/).
 Ce dépôt contient l’application principale, composée de :
 
 - Un **frontend** (Svelte) utilisant :
-
-  - [`sv-router`](#)
-  - [`shadcn-svelte`](#)
-  - [`tailwindcss`](#)
+  - [`sv-router`](https://sv-router.vercel.app/)
+  - [`shadcn-svelte`](https://shadcn-svelte.com/)
+  - [`tailwindcss`](https://tailwindcss.com/)
 - Un **backend** (Go) utilisant :
-
-  - [`gin`](#)
-  - [`gorm`](#)
+  - [`gin`](https://gin-gonic.com/)
+  - [`gorm`](https://gorm.io/index.html)
 
 #### SOCme-os
 
@@ -107,7 +102,8 @@ pour afficher des infos système sur les _nodes_.
 
 #### OPSme
 
-[OPSme](#) : bibliothèque Go pour gérer une flotte de machines via SSH.
+[OPSme](https://github.com/socme-project/opsme) : bibliothèque Go pour gérer une
+flotte de machines via SSH.
 
 #### Dépendances externes
 
