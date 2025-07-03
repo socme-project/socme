@@ -13,7 +13,7 @@ type Client struct {
 	ID     string `gorm:"primaryKey"`
 	Name   string `gorm:"unique;not null"`
 	Logo   string
-	Alerts []Alert `gorm:"constraint:OnDelete:CASCADE;"`
+	Alerts []Alert `gorm:"foreignKey:ClientID"`
 
 	LastAlert time.Time
 

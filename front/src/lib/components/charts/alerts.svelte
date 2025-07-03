@@ -10,18 +10,12 @@
   }: { alerts: number[]; hexColor: string } = $props();
 
   const chartData = [
-    { hour: "-22h", count: alerts[0] },
-    { hour: "-20h", count: alerts[1] },
-    { hour: "-18h", count: alerts[2] },
-    { hour: "-16h", count: alerts[3] },
-    { hour: "-14h", count: alerts[4] },
-    { hour: "-12h", count: alerts[5] },
-    { hour: "-10h", count: alerts[6] },
-    { hour: "-8h", count: alerts[7] },
-    { hour: "-6h", count: alerts[8] },
-    { hour: "-4h", count: alerts[9] },
-    { hour: "-2h", count: alerts[10] },
-    { hour: "now", count: alerts[11] },
+    { hour: "-20h", count: alerts[0] },
+    { hour: "-16h", count: alerts[1] },
+    { hour: "-12h", count: alerts[2] },
+    { hour: "-8h", count: alerts[3] },
+    { hour: "-4h", count: alerts[4] },
+    { hour: "now", count: alerts[5] },
   ];
 
   const chartConfig = {

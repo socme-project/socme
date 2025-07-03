@@ -20,7 +20,6 @@ type API struct {
 	RefreshRate time.Duration
 	Oauth       Oauth
 	Logger      *log.Logger
-	Token       []byte
 	Router      *gin.Engine
 	Db          *gorm.DB
 	Domain      string
@@ -51,10 +50,6 @@ func NewApi() API {
 		logger.Warn("Missing GitHub OAuth environment variables")
 	}
 
-	if os.Getenv("TOKEN") == "" {
-		logger.Fatal("Missing TOKEN environment variable")
-	}
-
 	db, err := InitDatabase(utils.GetStringOrDefault(os.Getenv("DB_PATH"), "./socme.db"))
 	if err != nil {
 		logger.Fatal("Failed to initialize database: ", err)
@@ -67,7 +62,6 @@ func NewApi() API {
 			utils.GetIntOrDefault(os.Getenv("REFRESH_RATE"), 60),
 		) * time.Second,
 		Logger: logger,
-		Token:  []byte(os.Getenv("TOKEN")),
 		Db:     db,
 		Domain: utils.GetStringOrDefault(os.Getenv("DOMAIN"), "localhost"),
 		Oauth: Oauth{

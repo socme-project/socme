@@ -3,11 +3,14 @@ package model
 import (
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 )
+
+type Alerts []Alert
 
 type Alert struct {
 	ID              uint      `gorm:"primaryKey"`
-	ClientID        string    `gorm:"not null"` // ClientID is the ID of the client that this alert belongs to
 	WazuhAlertID    string    `             json:"wazuh_alert_id"`
 	RuleID          string    `             json:"rule_id"`
 	RuleLevel       uint      `             json:"rule_level"`
@@ -16,6 +19,8 @@ type Alert struct {
 	Tags            string    `             json:"tags"`     // Tags is category of alerts
 	Sort            int       `             json:"sort"`     // Sort is an index
 	RawJSON         string    `             json:"raw_json"` // Raw alert from Wazuh
+	ClientID        string
+	Client          Client `gorm:"foreignKey:ClientID"`
 }
 
 func (a Alert) String() string {
@@ -33,4 +38,94 @@ func (a Alert) String() string {
 		"}"
 }
 
-// NewAlert()
+func CreateAlert(
+	db *gorm.DB, clientid string, wazuhAlertID, ruleID, ruleDescription, rawJSON string,
+	ruleLevel uint, timestamp time.Time, sort int,
+) (*Alert, error) {
+	alert := Alert{
+		WazuhAlertID:    wazuhAlertID,
+		RuleID:          ruleID,
+		RuleLevel:       ruleLevel,
+		RuleDescription: ruleDescription,
+		Timestamp:       timestamp,
+		RawJSON:         rawJSON,
+		ClientID:        clientid,
+		Sort:            sort,
+	}
+
+	db.Create(&alert)
+
+	return &alert, nil
+}
+
+func GetAlertsByClientID(db *gorm.DB, clientID string) ([]Alert, error) {
+	var alerts []Alert
+	result := db.Where("client_id = ?", clientID).Find(&alerts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return alerts, nil
+}
+
+func GetAllAlerts(db *gorm.DB) ([]Alert, error) {
+	var alerts []Alert
+	result := db.Find(&alerts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return alerts, nil
+}
+
+func GetAlertByID(db *gorm.DB, id uint) (*Alert, error) {
+	alert := Alert{}
+	result := db.First(&alert, "id = ?", id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &alert, nil
+}
+
+func (a Alerts) FilterBySeverity(severity string) []Alert {
+	fun := func(alert Alert) bool { return false }
+
+	switch severity {
+	case "low":
+		fun = func(alert Alert) bool {
+			if alert.RuleLevel <= 6 {
+				return true
+			}
+			return false
+		}
+	case "medium":
+		fun = func(alert Alert) bool {
+			if alert.RuleLevel >= 7 && alert.RuleLevel <= 11 {
+				return true
+			}
+			return false
+		}
+	case "high":
+		fun = func(alert Alert) bool {
+			if alert.RuleLevel >= 12 && alert.RuleLevel <= 14 {
+				return true
+			}
+			return false
+		}
+	case "critical":
+		fun = func(alert Alert) bool {
+			if alert.RuleLevel >= 15 {
+				return true
+			}
+			return false
+		}
+	}
+
+	filteredAlerts := []Alert{}
+
+	for i := range a {
+		if fun(a[i]) {
+			filteredAlerts = append(filteredAlerts, a[i])
+		}
+	}
+
+	return filteredAlerts
+}

@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"time"
+
 	"github.com/charmbracelet/log"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
@@ -8,13 +10,13 @@ import (
 )
 
 type routerType struct {
-	Db     *gorm.DB
-	R      *gin.Engine
-	Dev    bool
-	Token  []byte
-	Domain string
-	Oauth  Oauth
-	Logger *log.Logger
+	Db          *gorm.DB
+	R           *gin.Engine
+	Dev         bool
+	Domain      string
+	Oauth       Oauth
+	RefreshRate time.Duration
+	Logger      *log.Logger
 }
 
 type Oauth struct {
@@ -30,17 +32,17 @@ func InitRoutes(
 	dev bool,
 	logger *log.Logger,
 	oauthConfig Oauth,
-	token []byte,
 	domain string,
+	refreshRate time.Duration,
 ) {
 	r := routerType{
-		R:      router,
-		Db:     db,
-		Oauth:  oauthConfig,
-		Logger: logger,
-		Token:  token,
-		Dev:    dev,
-		Domain: domain,
+		R:           router,
+		Db:          db,
+		Oauth:       oauthConfig,
+		Logger:      logger,
+		Dev:         dev,
+		Domain:      domain,
+		RefreshRate: refreshRate,
 	}
 
 	r.authRoutes()

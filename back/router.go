@@ -22,8 +22,8 @@ func InitRouter(api *API) *gin.Engine {
 			RedirectURL:  api.Oauth.RedirectURL,
 			Cfg:          api.Oauth.Cfg,
 		},
-		api.Token,
 		api.Domain,
+		api.RefreshRate,
 	)
 
 	return router
