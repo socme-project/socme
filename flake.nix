@@ -18,7 +18,7 @@
         import ./nix/front.nix {
           pkgs = nixpkgs.legacyPackages.${system};
           lib = nixpkgs.lib;
-          bun2nix = bun2nix.packages.${system};
+          bun2nix = bun2nix;
         };
 
       importBackend = system:
@@ -40,3 +40,4 @@
         };
     };
 }
+
