@@ -9,7 +9,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-check",
-		"postinstall": "sv-router"
+		"postinstall": "sv-router && bun2nix -o bun.nix"
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.515.0",

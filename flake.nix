@@ -4,9 +4,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     systems.url = "github:nix-systems/default";
+    bun2nix = {
+      url = "github:baileyluTCD/bun2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { systems, self, nixpkgs, ... }:
+  outputs = { systems, self, nixpkgs, bun2nix, ... }:
     let
       eachSystem = nixpkgs.lib.genAttrs (import systems);
 
@@ -14,6 +18,7 @@
         import ./nix/front.nix {
           pkgs = nixpkgs.legacyPackages.${system};
           lib = nixpkgs.lib;
+          bun2nix = bun2nix.packages.${system};
         };
 
       importBackend = system:
