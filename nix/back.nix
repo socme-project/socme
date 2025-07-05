@@ -15,7 +15,7 @@ in {
       enable = lib.mkEnableOption "Exposed backend for SOCme";
       port = lib.mkOption {
         type = lib.types.port;
-        default = 8090;
+        default = 8080;
         description = "Port on which the SOCme backend will listen.";
       };
       user = lib.mkOption {
