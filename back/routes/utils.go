@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/socme-projects/backend/model"
@@ -46,20 +47,26 @@ func parseGithubUser(body io.ReadCloser) (githubID string, githubLogin string, e
 	var githubUser map[string]any
 	err = json.NewDecoder(body).Decode(&githubUser)
 	if err != nil {
-		err = errors.New("Failed to decode the anwser from Github")
+		err = errors.New("failed to decode the answer from Github")
 		return
 	}
 
-	githubIDFloat, ok := githubUser["id"].(float64)
+	id, ok := githubUser["id"].(float64)
 	if !ok {
-		err = errors.New("Failed to parse GitHub user ID")
-		return
+		idStr, isStr := githubUser["id"].(string)
+		if isStr {
+			githubID = idStr
+		} else {
+			err = errors.New("failed to parse GitHub user ID: unexpected type")
+			return
+		}
+	} else {
+		githubID = strconv.FormatFloat(id, 'f', 0, 64)
 	}
-	githubID = fmt.Sprintf("%.0f", githubIDFloat)
 
 	githubLogin, ok = githubUser["login"].(string)
 	if !ok {
-		err = errors.New("Failed to parse GitHub user login")
+		err = errors.New("failed to parse GitHub user login")
 		return
 	}
 
