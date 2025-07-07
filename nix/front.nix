@@ -1,38 +1,40 @@
-{ pkgs, lib, bun2nix }:
-
-let
+{
+  pkgs,
+  lib,
+  bun2nix,
+}: let
   packageJson = lib.importJSON ../front/package.json;
 
-  pname = if lib.isAttrs packageJson && lib.hasAttr "name" packageJson
-          then packageJson.name
-          else "socme-frontend-default";
+  pname =
+    if lib.isAttrs packageJson && lib.hasAttr "name" packageJson
+    then packageJson.name
+    else "socme-frontend-default";
 
-  version = if lib.isAttrs packageJson && lib.hasAttr "version" packageJson
-           then packageJson.version
-           else "0.0.0";
-
+  version =
+    if lib.isAttrs packageJson && lib.hasAttr "version" packageJson
+    then packageJson.version
+    else "0.0.0";
 in
-bun2nix.lib.${pkgs.system}.mkBunDerivation {
-  inherit pname version;
-  src = ../front;
+  bun2nix.lib.${pkgs.system}.mkBunDerivation {
+    inherit pname version;
+    src = ../front;
 
-  bunNix = ../front/bun.nix;
+    bunNix = ../front/bun.nix;
 
-  outputHash = "sha256-+yeCM2fhdD/rtrG6ZeRY4a5+OgjGiIUtLtgoBlfE9zY="; 
-  outputHashAlgo = "sha256";
-  outputHashMode = "recursive"; 
+    outputHash = "sha256-+yeCM2fhdD/rtrG6ZeRY4a5+OgjGiIUtLtgoBlfE9zY=";
+    outputHashAlgo = "sha256";
+    outputHashMode = "recursive";
 
-  index = null;
+    index = null;
 
-  nativeBuildInputs = [ pkgs.bun pkgs.vite pkgs.typescript pkgs.rsync ];
+    nativeBuildInputs = [pkgs.bun pkgs.vite pkgs.typescript pkgs.rsync];
 
-  buildPhase = ''
-    ${pkgs.bun}/bin/bun run build
-  '';
+    buildPhase = ''
+      ${pkgs.bun}/bin/bun run build
+    '';
 
-  installPhase = ''
-    mkdir -p $out/share/${pname}
-    cp -r dist/* $out/share/${pname}/
-  '';
-}
-
+    installPhase = ''
+      mkdir -p $out/${pname}
+      cp -r dist/* $out/${pname}/
+    '';
+  }
