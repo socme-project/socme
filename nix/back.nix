@@ -1,6 +1,8 @@
-{ pkgs, lib, self }:
-
-let
+{
+  pkgs,
+  lib,
+  self,
+}: let
   socmeBackend = pkgs.buildGoModule {
     pname = "socme-backend";
     version = "0.1.0";
@@ -10,9 +12,14 @@ let
 in {
   package = socmeBackend;
 
-  nixosModule = { config, ... }: {
+  nixosModule = {config, ...}: {
     options.services.socme-backend = {
       enable = lib.mkEnableOption "Exposed backend for SOCme";
+      domain = lib.mkOption {
+        type = lib.types.str;
+        default = "localhost";
+        description = "Domain name for the SOCme backend service.";
+      };
       port = lib.mkOption {
         type = lib.types.port;
         default = 8080;
@@ -41,8 +48,7 @@ in {
       githubClientId = lib.mkOption {
         type = lib.types.str;
         default = "";
-        description =
-          "Client ID for GitHub OAuth integration in SOCme backend.";
+        description = "Client ID for GitHub OAuth integration in SOCme backend.";
       };
       githubClientSecret = lib.mkOption {
         type = lib.types.str;
@@ -54,35 +60,24 @@ in {
         default = "";
         description = "Redirect URL for GitHub OAuth in SOCme backend.";
       };
-      developmentMode = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable development mode for the SOCme backend service.";
-      };
     };
 
     config = lib.mkIf config.services.socme-backend.enable {
       systemd.services.socme-backend = {
         description = "SOCme Backend Service";
-        after = [ "network.target" ];
-        wantedBy = [ "multi-user.target" ];
+        after = ["network.target"];
+        wantedBy = ["multi-user.target"];
         serviceConfig = {
-          ExecStart =
-            "${self.packages.${pkgs.system}.socme-backend}/bin/cmd";
+          ExecStart = "${self.packages.${pkgs.system}.socme-backend}/bin/cmd";
           Restart = "always";
           User = config.services.socme-backend.user;
           Group = config.services.socme-backend.group;
           DynamicUser = true;
           StateDirectory = "socme-backend";
-          ReadWritePaths = [ "/var/lib/socme-backend" ];
+          ReadWritePaths = ["/var/lib/socme-backend"];
           Environment = [
+            "DOMAIN=${toString config.services.socme-backend.domain}"
             "BACKEND_PORT=${toString config.services.socme-backend.port}"
-            "IS_PROD=${
-              if config.services.socme-backend.developmentMode then
-                "false"
-              else
-                "true"
-            }"
             "DB_PATH=${config.services.socme-backend.dbPath}"
             "ALERT_RETRIEVAL_INTERVAL=${config.services.socme-backend.alertRetrievalInterval}"
             "GITHUB_CLIENT_ID=${config.services.socme-backend.githubClientId}"

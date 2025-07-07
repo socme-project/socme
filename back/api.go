@@ -55,15 +55,18 @@ func NewApi() API {
 		logger.Fatal("Failed to initialize database: ", err)
 	}
 
+	refreshRate, err := time.ParseDuration(utils.GetStringOrDefault(os.Getenv("ALERT_RETRIEVAL_INTERVAL"), "5m"))
+	if err != nil {
+		logger.Fatal("Failed to parse ALERT_RETRIEVAL_INTERVAL: ", err)
+	}
+
 	api := API{
-		Port: utils.GetStringOrDefault(os.Getenv("PORT"), "8080"),
-		Dev:  utils.GetBoolOrDefault(os.Getenv("DEV"), false),
-		RefreshRate: time.Duration(
-			utils.GetIntOrDefault(os.Getenv("REFRESH_RATE"), 60),
-		) * time.Second,
-		Logger: logger,
-		Db:     db,
-		Domain: utils.GetStringOrDefault(os.Getenv("DOMAIN"), "localhost"),
+		Port:        utils.GetStringOrDefault(os.Getenv("PORT"), "8080"),
+		Dev:         utils.GetBoolOrDefault(os.Getenv("DEV"), false),
+		RefreshRate: refreshRate,
+		Logger:      logger,
+		Db:          db,
+		Domain:      utils.GetStringOrDefault(os.Getenv("DOMAIN"), "localhost"),
 		Oauth: Oauth{
 			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
 			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
