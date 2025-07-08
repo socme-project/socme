@@ -149,6 +149,15 @@ func DeleteClient(db *gorm.DB, id string) error {
 	return nil
 }
 
+func EditLastAlert(db *gorm.DB, client Client, lastAlert time.Time) error {
+	client.LastAlert = lastAlert
+	result := db.Save(&client)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func EditClient(db *gorm.DB, id string,
 	name string,
 	logo string,

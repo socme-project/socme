@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Ghost, UserCog } from "@lucide/svelte";
+  import { Ghost, Folder } from "@lucide/svelte";
   import * as Avatar from "$lib/components/ui/avatar/index.js";
   import axios from "axios";
   import { onMount } from "svelte";
@@ -35,7 +35,7 @@
 <div class="flex justify-between flex-wrap gap-8 items-center">
   <div>
     <h1 class="flex items-center gap-4">
-      <UserCog />
+      <Folder />
       Clients
     </h1>
 

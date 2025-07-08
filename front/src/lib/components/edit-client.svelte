@@ -35,23 +35,23 @@
 
 <div class="grid gap-4 py-4">
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="name" class="text-right">Name</Label>
+    <Label for="name">Name</Label>
     <Input id="name" bind:value={client.Name} class="col-span-3" />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="logo" class="text-right">Logo URL</Label>
+    <Label for="logo">Logo URL</Label>
     <Input id="logo" bind:value={client.Logo} class="col-span-3" />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="wazuh_ip" class="text-right">Wazuh IP</Label>
+    <Label for="wazuh_ip">Wazuh IP</Label>
     <Input id="wazuh_ip" bind:value={client.WazuhIP} class="col-span-3" />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="wazuh_port" class="text-right">Wazuh Port</Label>
+    <Label for="wazuh_port">Wazuh Port</Label>
     <Input id="wazuh_port" bind:value={client.WazuhPort} class="col-span-3" />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="wazuh_username" class="text-right">Wazuh Username</Label>
+    <Label for="wazuh_username">Wazuh Username</Label>
     <Input
       id="wazuh_username"
       bind:value={client.WazuhUsername}
@@ -59,7 +59,7 @@
     />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="wazuh_password" class="text-right">Wazuh Password</Label>
+    <Label for="wazuh_password">Wazuh Password</Label>
     <Input
       type="password"
       id="wazuh_password"
@@ -68,11 +68,11 @@
     />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="indexer_ip" class="text-right">Indexer IP</Label>
+    <Label for="indexer_ip">Indexer IP</Label>
     <Input id="indexer_ip" bind:value={client.IndexerIP} class="col-span-3" />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="indexer_port" class="text-right">Indexer Port</Label>
+    <Label for="indexer_port">Indexer Port</Label>
     <Input
       id="indexer_port"
       bind:value={client.IndexerPort}
@@ -80,7 +80,7 @@
     />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="indexer_username" class="text-right">Indexer Username</Label>
+    <Label for="indexer_username">Indexer Username</Label>
     <Input
       id="indexer_username"
       bind:value={client.IndexerUsername}
@@ -88,7 +88,7 @@
     />
   </div>
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="indexer_password" class="text-right">Indexer Password</Label>
+    <Label for="indexer_password">Indexer Password</Label>
     <Input
       type="password"
       id="indexer_password"

@@ -1,16 +1,13 @@
 <script lang="ts">
-  import { Ghost, UserCog } from "@lucide/svelte";
+  import { Ghost, FolderCog } from "@lucide/svelte";
   import * as Avatar from "$lib/components/ui/avatar/index.js";
   import axios from "axios";
   import { onMount } from "svelte";
   import * as Table from "$lib/components/ui/table/index.js";
   import { sendError } from "$src/lib/utils";
-
   import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-  import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
-
+  import { buttonVariants } from "$lib/components/ui/button/index.js";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
-
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
   import CreateClient from "$src/lib/components/create-client.svelte";
   import { toast } from "svelte-sonner";
@@ -57,7 +54,7 @@
 <div class="flex justify-between flex-wrap gap-8 items-center">
   <div>
     <h1 class="flex items-center gap-4">
-      <UserCog />
+      <FolderCog />
       Clients
     </h1>
 

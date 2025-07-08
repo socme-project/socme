@@ -45,7 +45,11 @@ func InitRoutes(
 		RefreshRate: refreshRate,
 	}
 
+	go r.UpdateAlerts()
+
 	r.authRoutes()
+	r.alertsRoutes()
 	r.userRoutes()
 	r.clientRoutes()
+	r.miscRoutes()
 }

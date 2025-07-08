@@ -10,15 +10,15 @@ import (
 type Alerts []Alert
 
 type Alert struct {
-	ID              uint      `gorm:"primaryKey"`
-	WazuhAlertID    string    `             json:"wazuh_alert_id"`
-	RuleID          string    `             json:"rule_id"`
-	RuleLevel       uint      `             json:"rule_level"`
-	RuleDescription string    `             json:"rule_description"`
-	Timestamp       time.Time `             json:"timestamp"`
-	Tags            string    `             json:"tags"`     // Tags is category of alerts
-	Sort            int       `             json:"sort"`     // Sort is an index
-	RawJSON         string    `             json:"raw_json"` // Raw alert from Wazuh
+	ID              uint `gorm:"primaryKey"`
+	WazuhAlertID    string
+	RuleID          string
+	RuleLevel       uint
+	RuleDescription string
+	Timestamp       time.Time
+	Tags            string // Tags is category of alerts
+	Sort            int    // Sort is an index
+	RawJSON         string // Raw alert from Wazuh
 	ClientID        string
 	Client          Client `gorm:"foreignKey:ClientID"`
 }
@@ -76,9 +76,18 @@ func GetAllAlerts(db *gorm.DB) ([]Alert, error) {
 	return alerts, nil
 }
 
+func GetAlertsFromClient(db *gorm.DB, clientID string) (Alerts, error) {
+	var alerts []Alert
+	result := db.Where("client_id = ?", clientID).Find(&alerts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return alerts, nil
+}
+
 func GetAlertByID(db *gorm.DB, id uint) (*Alert, error) {
 	alert := Alert{}
-	result := db.First(&alert, "id = ?", id)
+	result := db.Preload("Client").First(&alert, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}

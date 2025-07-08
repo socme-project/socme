@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -35,8 +34,9 @@ func (r routerType) UpdateAlertsForClient(client model.Client) {
 		Insecure: true,
 	}
 
-	if wazuhClient.RefreshToken() != nil {
-		r.Logger.Error("Failed to refresh token: " + err.Error())
+	err = wazuhClient.RefreshToken()
+	if err != nil {
+		r.Logger.Error("Failed to refresh token: ", err.Error())
 		return
 	}
 
@@ -53,6 +53,18 @@ func (r routerType) UpdateAlertsForClient(client model.Client) {
 		r.Logger.Error("Failed to add alerts to db:", err)
 		return
 	}
+
+	lastALert, err := time.Parse("2006-01-02T15:04:05.000-0700", alerts[len(alerts)-1].Timestamp)
+	if err != nil {
+		r.Logger.Error("Failed to parse last alert timestamp: " + err.Error())
+		return
+	}
+	err = model.EditLastAlert(r.Db, client, lastALert)
+
+	if err != nil {
+		r.Logger.Error("Failed to update last alert timestamp in db: " + err.Error())
+		return
+	}
 }
 
 func (r routerType) UpdateAlerts() {
@@ -67,14 +79,15 @@ func (r routerType) UpdateAlerts() {
 		for _, client := range clients {
 			go r.UpdateAlertsForClient(client)
 		}
+		// TODO: fastetch here
 		time.Sleep(r.RefreshRate)
 	}
 }
 
 func (r routerType) AddAlertToDb(alerts []wazuhapi.Alert, clientID string) error {
-	var client model.Client
-	if err := r.Db.First(&client, clientID).Error; err != nil {
-		return fmt.Errorf("client not found: %w", err)
+	client, err := model.GetClientByID(r.Db, clientID)
+	if err != nil {
+		return err
 	}
 
 	layout := "2006-01-02T15:04:05.000-0700"
@@ -93,7 +106,7 @@ func (r routerType) AddAlertToDb(alerts []wazuhapi.Alert, clientID string) error
 			alert.RuleDescription,
 			alert.RawJSON,
 			alert.RuleLevel,
-			timestamp,
+			timestamp.UTC(),
 			alert.Sort,
 		)
 		if err != nil {
