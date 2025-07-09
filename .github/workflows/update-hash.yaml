@@ -1,0 +1,66 @@
+name: Hash Updater
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'front/**'
+      - 'back/go.sum'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update_and_build_all:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@v10
+      with:
+        extra-features: "nix-command flakes"
+
+    - name: Enable Nix cache
+      uses: DeterminateSystems/magic-nix-cache-action@v6
+
+    - name: Update Hashes and Commit
+      run: |
+        NIX_FRONT_FILE="nix/front.nix"
+        NIX_BACK_FILE="nix/back.nix"
+        DUMMY_HASH="sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        UPDATED_ANY=false
+
+        sed -i "s|outputHash = \"sha256-.*\";|outputHash = \"$DUMMY_HASH\";|" "$NIX_FRONT_FILE" || exit 1
+        BUILD_OUTPUT_FRONT=$(nix build -L .#socme-frontend 2>&1 || true)
+        NEW_HASH_FRONT=$(echo "$BUILD_OUTPUT_FRONT" | grep -oP 'got:\s*\Ksha256-[a-zA-Z0-9+/=]+')
+        if [ -n "$NEW_HASH_FRONT" ]; then
+          sed -i "s|outputHash = \"$DUMMY_HASH\";|outputHash = \"$NEW_HASH_FRONT\";|" "$NIX_FRONT_FILE"
+          UPDATED_ANY=true
+        else
+          git checkout -- "$NIX_FRONT_FILE"
+        fi
+
+        sed -i "s|vendorHash = \"sha256-.*\";|vendorHash = \"$DUMMY_HASH\";|" "$NIX_BACK_FILE" || exit 1
+        BUILD_OUTPUT_BACK=$(nix build -L .#socme-backend 2>&1 || true)
+        NEW_HASH_BACK=$(echo "$BUILD_OUTPUT_BACK" | grep -oP 'got:\s*\Ksha256-[a-zA-Z0-9+/=]+')
+        if [ -n "$NEW_HASH_BACK" ]; then
+          sed -i "s|vendorHash = \"$DUMMY_HASH\";|vendorHash = \"$NEW_HASH_BACK\";|" "$NIX_BACK_FILE"
+          UPDATED_ANY=true
+        else
+          git checkout -- "$NIX_BACK_FILE"
+        fi
+
+        if [ "$UPDATED_ANY" = true ]; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$NIX_FRONT_FILE" "$NIX_BACK_FILE"
+          git commit -m "ci: Auto-update Nix hashes [skip ci]"
+          git pull --rebase || exit 1
+          git push
+        fi
+
