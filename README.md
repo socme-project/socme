@@ -6,11 +6,11 @@
 
 ### Liens externes
 
-- [English version 🇬🇧](./docs/README-en.md)
+- [English version 🇬🇧](./README-en.md)
 - [Frontend (FR)](./front/README.md)
-- [Frontend (EN)](./front/docs/README-en.md)
+- [Frontend (EN)](./front/README-en.md)
 - [Backend (FR)](./back/README.md)
-- [Backend (EN)](./back/docs/README-en.md)
+- [Backend (EN)](./back/README-en.md)
 
 ## Introduction
 
@@ -151,3 +151,5 @@ Pendant la phase RUN :
 - Analyse et réponse selon criticité
 - Création de nouvelles règles si nécessaire
 - Documentation des événements
+
+## Installation

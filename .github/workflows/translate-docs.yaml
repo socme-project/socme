@@ -1,0 +1,110 @@
+name: Translate READMEs (FR to EN)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+      - 'front/README.md'
+      - 'back/README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  detect_files:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Markdown Files
+        id: set-matrix
+        run: |
+          BASE_COMMIT="${{ github.event.before }}"
+          if [ -z "$BASE_COMMIT" ] || [ "$BASE_COMMIT" == "0000000000000000000000000000000000000000" ]; then
+            BASE_COMMIT="HEAD^"
+          fi
+
+          CHANGED_FILES_RAW=$(git diff --name-only --diff-filter=AM "$BASE_COMMIT" HEAD -- \
+            'README.md' \
+            'front/README.md' \
+            'back/README.md')
+
+          if [ -z "$CHANGED_FILES_RAW" ]; then
+            echo "::set-output name=matrix::[]"
+            echo "No changed files detected for translation."
+          else
+            JSON_ARRAY="["
+            FIRST=true
+            for file_path in $CHANGED_FILES_RAW; do
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                JSON_ARRAY+=","
+              fi
+              output_file_path=""
+              if [[ "$file_path" == "README.md" ]]; then
+                output_file_path="./README-en.md"
+              elif [[ "$file_path" == "front/README.md" ]]; then
+                output_file_path="./front/README-en.md"
+              elif [[ "$file_path" == "back/README.md" ]]; then
+                output_file_path="./back/README-en.md"
+              fi
+              if [ -n "$output_file_path" ]; then
+                JSON_ARRAY+="{\"input_file\":\"$file_path\", \"output_file\":\"$output_file_path\"}"
+              fi
+            done
+            JSON_ARRAY+="]"
+            echo "::set-output name=matrix::$JSON_ARRAY"
+            echo "Detected files for translation: $JSON_ARRAY"
+          fi
+        shell: /usr/bin/bash -e {0}
+
+  translate_docs:
+    needs: detect_files
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        file: ${{ fromJson(needs.detect_files.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create output directory
+        run: mkdir -p "$(dirname "${{ matrix.file.output_file }}")"
+
+      - name: Translate Markdown Documentation for ${{ matrix.file.input_file }}
+        uses: KevinRohn/gh-action-markdown-translate-ai@v1.0.1
+        with:
+          api_key: ${{ secrets.AI_API_KEY }}
+          service_provider: 'gemini'
+          model: 'gemini-2.0-flash'
+          source_language: 'French'
+          target_language: 'English'
+          file_path: ${{ matrix.file.input_file }}
+          output_file_path: ${{ matrix.file.output_file }}
+
+      - name: Check for changes after translation
+        id: git-status
+        run: |
+          if [[ $(git status --porcelain) ]]; then
+            echo "::set-output name=has_changes::true"
+            echo "Detected changes for commit."
+          else
+            echo "No changes detected for commit."
+          fi
+        shell: /usr/bin/bash -e {0}
+
+      - name: Commit and Push Translated Files
+        if: steps.git-status.outputs.has_changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(i18n): Automatic FR->EN Markdown translation updates for ${{ matrix.file.input_file }}"
+          branch: main
