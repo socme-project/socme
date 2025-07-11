@@ -1,4 +1,4 @@
-# SOCME frontend application
+# SOCME frontend app
 
 Il s'agit du frontend SOCME, qui permet à l'utilisateur de dialoguer avec le backend SOCME
 API à l'aide d'un frontend attrayant.

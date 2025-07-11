@@ -1,4 +1,4 @@
-# SOCME Backend
+# SOCME Backend app
 
 ## Règles
 
