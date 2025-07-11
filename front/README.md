@@ -1,24 +1,24 @@
 # SOCME frontend application
 
-This is the SOCME frontend, it allows the user to talk with the SOCME backend
-API with a appealing frontend.
+Il s'agit du frontend SOCME, qui permet à l'utilisateur de dialoguer avec le backend SOCME
+API à l'aide d'un frontend attrayant.
 
-It use:
+Il utilise les technologies suivantes :
 
 - sv-router (colinlienard/sv-router)
 - shadcn-svelte
 - tailwindcss
 - axios
 
-## Usage
+## Utilisation
 
-Install the requirements:
+Installez les pré-requis :
 
 ```sh
 bun install
 ```
 
-Start the dev server:
+Démarrez le serveur de développement :
 
 ```sh
 bun dev

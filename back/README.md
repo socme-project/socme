@@ -1,34 +1,34 @@
 # SOCME Backend
 
-## Rules
+## Règles
 
-- The first user created is an admin
-- When a user is created using OAuth, we gave him the "guest" role, it can't do anything. Redirected to a guest page
-- An admin can change the role of a user to "user" or "admin"
+- Le premier utilisateur créé est un admin
+- Lorsqu'un utilisateur est créé avec OAuth, nous lui avons donné le rôle "guest", il ne peut rien faire, il sera redirigé vers une page d'invité
+- Un administrateur peut changer le rôle d'un utilisateur en "user" ou "admin".
 
-- Users and clients are stored in JSON files
-- Alerts are stored in a database (SQLite for dev, PostgreSQL for prod)
+- Les utilisateurs et les clients sont stockés dans des fichiers JSON.
+- Les alertes sont stockées dans une base de données (SQLite pour dev, PostgreSQL pour prod)
 
 ## Auth
 
-- Users can authenticate using OAuth (GitHub)
+- Les utilisateurs peuvent s'authentifier en utilisant OAuth (GitHub)
 
-## Paths
+## Chemins
 
-| **Category**  | **Method** | **Path**                          | **Description**                                      | **Permissions** |
+| **Catégorie**  | **Methode** | **Chemin**                          | **Description**                                      | **Permissions** |
 |--------------|----------|--------------------------------|--------------------------------------------------|----------------|
-| **Alerts**   | GET      | `/alerts`                     | Get all alerts (supports pagination & filters)  | User |
-|              | GET      | `/alerts/:id`                 | Get one alert by ID                            | User |
-|              | GET      | `/alerts/stats/:severity`     | Get graph info (last 24h, 12 bars)             | User |
-| **Clients**  | GET      | `/clients`                    | Get all clients                                | User |
-|              | GET      | `/clients/:id`                | Get one client by ID                           | User |
-|              | POST     | `/clients`                    | Create a new client                           | Admin |
-| **Users**    | GET      | `/users`                      | Get all users                                 | Admin |
-|              | PATCH    | `/users/:id`             | Change user (except role)                              | Admin or THE user |
-|              | PATCH    | `/users/:id/role`             | Change user role                              | Admin |
-|              | DELETE   | `/users/:id/session`          | Revoke a session token                        | Admin or THE user |
-|              | DELETE   | `/users/:id`                  | Delete a user                                 | Admin or THE user |
-| **Misc**     | GET      | `/certfr`                     | Get the CERT-FR alerts                        | User |
-| **Auth**     | GET      | `/auth/refresh`               | Refresh user token & info                     | User |
-| | GET      | `/auth/github`               | Auth with github | User |
+| **Alerts**   | GET      | `/alerts`                     | Récupérer toutes les alertes (avec pagination et filtres) | User |
+|              | GET      | `/alerts/:id`                 | Récupérer une alerte par ID                         | User |
+|              | GET      | `/alerts/stats/:severity`     | Obtenir des infos sur le graphique (dernières 24 heures, 12 barres)   | User |
+| **Clients**  | GET      | `/clients`                    | Récupérer tous les clients                                | User |
+|              | GET      | `/clients/:id`                | Récupérer un client par ID                           | User |
+|              | POST     | `/clients`                    | Créer un nouveau client                           | Admin |
+| **Users**    | GET      | `/users`                      | Récupérer tous les users                                 | Admin |
+|              | PATCH    | `/users/:id`             | Changer l'user (sauf son rôle)                              | Admin ou l'user |
+|              | PATCH    | `/users/:id/role`             | Changer le rôle de l'user                              | Admin |
+|              | DELETE   | `/users/:id/session`          | Revoquer un token de session                    | Admin ou l'user |
+|              | DELETE   | `/users/:id`                  | Supprimer un user                                 | Admin ou l'user |
+| **Misc**     | GET      | `/certfr`                     | Récupérer les alertes du CERT-FR                        | User |
+| **Auth**     | GET      | `/auth/refresh`               | Rafraîchir le jeton et les infos de l'user                     | User |
+| | GET      | `/auth/github`               | Auth avec Github | User |
 | | GET      | `/auth/callback`               | Auth callback | User |
