@@ -1,7 +1,6 @@
 <script lang="ts">
   import * as Chart from "$lib/components/ui/chart/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
-  import { PieChart, Text } from "layerchart";
   import Alerts from "$src/lib/components/charts/alerts.svelte";
   import Button from "$src/lib/components/ui/button/button.svelte";
   import Clients from "$src/lib/components/charts/clients.svelte";
@@ -11,11 +10,11 @@
     Signal,
     LayoutDashboard,
   } from "@lucide/svelte";
-    import { sendError } from "$src/lib/utils";
-    import axios from "axios";
-    import { onMount } from "svelte";
-    import Badge from "$src/lib/components/ui/badge/badge.svelte";
-    import type { Alert } from "$src/lib/components/alerts/columns";
+  import { sendError } from "$src/lib/utils";
+  import axios from "axios";
+  import { onMount } from "svelte";
+  import Badge from "$src/lib/components/ui/badge/badge.svelte";
+  import type { Alert } from "$src/lib/components/alerts/columns";
 
   // TODO: Refresh every 5 minutes
   const agentData = [
@@ -37,21 +36,25 @@
   let lastAlerts = $state<Alert[]>([]);
 
   async function loadStats() {
-    axios.get("/api/alerts/stats/medium")
+    axios
+      .get("/api/alerts/stats/medium")
       .then((response) => {
         statsMedium = response.data.events;
       })
       .catch((error) => {
         sendError("Error fetching stats:", error);
       });
-    axios.get("/api/alerts/stats/high")
+    axios
+      .get("/api/alerts/stats/high")
       .then((response) => {
         statsHigh = response.data.events;
+        console.log(response.data.events);
       })
       .catch((error) => {
         sendError("Error fetching stats:", error);
       });
-    axios.get("/api/alerts/stats/critical")
+    axios
+      .get("/api/alerts/stats/critical")
       .then((response) => {
         statsCritical = response.data.events;
       })
@@ -69,14 +72,16 @@
         },
       })
       .then((res) => {
-        lastAlerts = res.data.alerts
+        lastAlerts = res.data.alerts;
       })
       .catch((err) => {
         sendError("Error fetching stats:", err);
       });
   }
 
-  onMount(async ()=>{loadStats()})
+  onMount(async () => {
+    loadStats();
+  });
 </script>
 
 <h1 class="flex items-center gap-4">
@@ -101,10 +106,11 @@
       >
     </Card.Header>
     <Card.Content class="flex-1 grid items-end">
-      <Alerts
-        alerts={statsMedium}
-        hexColor="oklch(0.72 0.19 150)"
-      />
+      {#if statsMedium.length === 0}
+        <Alerts alerts={statsMedium} hexColor="oklch(0.70 0.19 48)" />
+      {:else}
+        <Alerts alerts={statsMedium} hexColor="oklch(0.70 0.19 48)" />
+      {/if}
     </Card.Content>
   </Card.Root>
 
@@ -115,7 +121,11 @@
       >
     </Card.Header>
     <Card.Content class="flex-1 grid items-end">
-      <Alerts alerts={statsHigh} hexColor="oklch(0.70 0.19 48)" />
+      {#if statsHigh.length === 0}
+        <Alerts alerts={statsHigh} hexColor="oklch(0.70 0.19 48)" />
+      {:else}
+        <Alerts alerts={statsHigh} hexColor="oklch(0.70 0.19 48)" />
+      {/if}
     </Card.Content>
   </Card.Root>
 
@@ -126,7 +136,11 @@
       >
     </Card.Header>
     <Card.Content class="flex-1 grid items-end">
-      <Alerts alerts={statsCritical} hexColor="oklch(0.64 0.21 25)" />
+      {#if statsCritical.length === 0}
+        <Alerts alerts={statsCritical} hexColor="oklch(0.70 0.19 48)" />
+      {:else}
+        <Alerts alerts={statsCritical} hexColor="oklch(0.70 0.19 48)" />
+      {/if}
     </Card.Content>
   </Card.Root>
 
@@ -136,29 +150,29 @@
       <Card.Description>Only high/critical alerts displayed</Card.Description>
     </Card.Header>
     <Card.Content class="flex-1 grid items-end">
-    {#if lastAlerts.length === 0}
-      <p class="text-muted-foreground">No alerts found</p>
-    {:else}
-      {#each lastAlerts as alert}
-        <a
-          href={"/dashboard/alerts/" + alert.ID}
-          class="hover:bg-accent/40 p-4 rounded-lg"
-        >
-          <div class="flex justify-between gap-2">
-            <div class="flex flex-col gap-1">
-              <p>
-                <Badge class="bg-red-400 hover:bg-red-400">Critical</Badge>
-                {alert.RuleDescription}
-              </p>
-              <p class="text-muted-foreground">
-                Client:{alert.Client.Name} ID:{alert.ID}
-              </p>
+      {#if lastAlerts.length === 0}
+        <p class="text-muted-foreground">No alerts found</p>
+      {:else}
+        {#each lastAlerts as alert}
+          <a
+            href={"/dashboard/alerts/" + alert.ID}
+            class="hover:bg-accent/40 p-4 rounded-lg"
+          >
+            <div class="flex justify-between gap-2">
+              <div class="flex flex-col gap-1">
+                <p>
+                  <Badge class="bg-red-400 hover:bg-red-400">Critical</Badge>
+                  {alert.RuleDescription}
+                </p>
+                <p class="text-muted-foreground">
+                  Client:{alert.Client.Name} ID:{alert.ID}
+                </p>
+              </div>
+              <p class="text-muted-foreground text-sm">{alert.Timestamp}</p>
             </div>
-            <p class="text-muted-foreground text-sm">{alert.Timestamp}</p>
-          </div>
-        </a>
-      {/each}
-    {/if}
+          </a>
+        {/each}
+      {/if}
     </Card.Content>
     <Card.Footer>
       <Button href="/dashboard/alerts">See all alerts</Button>

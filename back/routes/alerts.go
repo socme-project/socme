@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -101,11 +100,15 @@ func (r *routerType) alertsRoutes() {
 		}
 
 		end := time.Now().UTC()
-		start := end.Add(-25 * time.Hour).UTC()
+		start := end.Add(-24 * time.Hour).UTC()
 
 		var alerts []model.Alert
 		query.Where("timestamp BETWEEN ? AND ?", start, end).Find(&alerts)
-		fmt.Println("Alerts found:", len(alerts))
+		// FIXME: Is the timestamp thing good ?
+
+		// fmt.Println("\n\n---------------------------------------------")
+		// fmt.Println(len(alerts))
+
 		alertsPerHour := make([]int, 24)
 
 		for _, alert := range alerts {
