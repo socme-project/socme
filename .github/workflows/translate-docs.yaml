@@ -23,8 +23,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect Changed Markdown Files
-        id: set-matrix
+      - id: set-matrix
         run: |
           BASE_COMMIT="${{ github.event.before }}"
           if [ -z "$BASE_COMMIT" ] || [ "$BASE_COMMIT" == "0000000000000000000000000000000000000000" ]; then
@@ -38,7 +37,6 @@ jobs:
 
           if [ -z "$CHANGED_FILES_RAW" ]; then
             echo "::set-output name=matrix::[]"
-            echo "No changed files detected for translation."
           else
             JSON_ARRAY="["
             FIRST=true
@@ -57,12 +55,11 @@ jobs:
                 output_file_path="./back/README-en.md"
               fi
               if [ -n "$output_file_path" ]; then
-                JSON_ARRAY+="{\"input_file\":\"$file_path\", \"output_file\":\"$output_file_path\"}"
+                JSON_ARRAY+="{\"input_file\":\"$file_path\", \"output_file\":\"$output_file_path\", \"artifact_suffix\":\"$(echo "$file_path" | sed 's/\//_/g' | sed 's/\./_/g')\"}"
               fi
             done
             JSON_ARRAY+="]"
             echo "::set-output name=matrix::$JSON_ARRAY"
-            echo "Detected files for translation: $JSON_ARRAY"
           fi
         shell: /usr/bin/bash -e {0}
 
@@ -73,15 +70,14 @@ jobs:
       fail-fast: false
       matrix:
         file: ${{ fromJson(needs.detect_files.outputs.matrix) }}
-
+    
     steps:
       - uses: actions/checkout@v4
 
       - name: Create output directory
         run: mkdir -p "$(dirname "${{ matrix.file.output_file }}")"
 
-      - name: Translate Markdown Documentation for ${{ matrix.file.input_file }}
-        uses: KevinRohn/gh-action-markdown-translate-ai@v1.0.1
+      - uses: KevinRohn/gh-action-markdown-translate-ai@v1.0.1
         with:
           api_key: ${{ secrets.AI_API_KEY }}
           service_provider: 'gemini'
@@ -90,21 +86,94 @@ jobs:
           target_language: 'English'
           file_path: ${{ matrix.file.input_file }}
           output_file_path: ${{ matrix.file.output_file }}
+          
+      - uses: actions/upload-artifact@v4
+        with:
+          name: translated-markdown-${{ matrix.file.artifact_suffix }}
+          path: |
+            ${{ matrix.file.output_file }}
+            ${{ matrix.file.output_file }}.stats.json
+          overwrite: true
 
-      - name: Check for changes after translation
-        id: git-status
+  commit_translated_files:
+    needs: [translate_docs, detect_files]
+    runs-on: ubuntu-latest
+    if: success() && needs.detect_files.outputs.matrix != '[]'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download and Place Translated Files
         run: |
+          # Use `jq` to parse the JSON matrix and iterate over files to download specific artifacts.
+          # We need to install jq first.
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+          # Get the full matrix data from the detect_files job
+          MATRIX_JSON='${{ needs.detect_files.outputs.matrix }}'
+
+          # Loop through each item in the matrix
+          echo "$MATRIX_JSON" | jq -c '.[]' | while read -r item; do
+              INPUT_FILE=$(echo "$item" | jq -r '.input_file')
+              OUTPUT_FILE=$(echo "$item" | jq -r '.output_file')
+              ARTIFACT_SUFFIX=$(echo "$item" | jq -r '.artifact_suffix')
+              
+              ARTIFACT_NAME="translated-markdown-$ARTIFACT_SUFFIX"
+              
+              echo "Downloading artifact '$ARTIFACT_NAME' for '$OUTPUT_FILE'"
+              
+              # Create the target directory if it doesn't exist
+              mkdir -p "$(dirname "$OUTPUT_FILE")"
+
+              # Download the specific artifact into the *parent directory* of the output file.
+              # The artifact contains `output_file` (e.g., `front/README-en.md`).
+              # If we download it to `.` with name `translated-markdown-front_README_md`, it should place
+              # `./front/README-en.md` correctly.
+              # The `download-artifact` action will create a subdirectory named after the artifact name.
+              # So, we need to download to a temp location and then move.
+              
+              TEMP_ARTIFACT_DIR=$(mktemp -d -t artifact-download-XXXXXXXXXX)
+
+              /usr/bin/python3 /home/runner/work/_actions/actions/download-artifact/v4/dist/retrying-download-artifact.py \
+                --artifact-name "$ARTIFACT_NAME" \
+                --path "$TEMP_ARTIFACT_DIR" \
+                --github-token "${{ github.token }}" \
+                --repository "${{ github.repository }}" \
+                --run-id "${{ github.run_id }}" \
+                --workflow-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+                --merge-multiple-artifacts "false" # Ensure this is false for distinct artifacts
+
+              cp -r "${TEMP_ARTIFACT_DIR}/${ARTIFACT_NAME}/$(echo "$OUTPUT_FILE" | sed 's/^\.\///')" "$OUTPUT_FILE" || true
+              cp -r "${TEMP_ARTIFACT_DIR}/${ARTIFACT_NAME}/$(echo "$OUTPUT_FILE.stats.json" | sed 's/^\.\///')" "$OUTPUT_FILE.stats.json" || true
+
+              rm -rf "$TEMP_ARTIFACT_DIR" # Clean up temporary directory
+          done
+        shell: /usr/bin/bash -e {0}
+
+      - name: Check for any changes to commit
+        id: git-status-final
+        run: |
+          # Add all potential translated files. This should now be reliable as files are placed correctly.
+          git add ./README-en.md || true
+          git add ./README-en.md.stats.json || true
+          git add ./front/README-en.md || true
+          git add ./front/README-en.md.stats.json || true
+          git add ./back/README-en.md || true
+          git add ./back/README-en.md.stats.json || true
+
           if [[ $(git status --porcelain) ]]; then
             echo "::set-output name=has_changes::true"
-            echo "Detected changes for commit."
           else
-            echo "No changes detected for commit."
+            echo "::set-output name=has_changes::false"
           fi
         shell: /usr/bin/bash -e {0}
 
-      - name: Commit and Push Translated Files
-        if: steps.git-status.outputs.has_changes == 'true'
+      - name: Commit and Push All Translated Files
+        if: steps.git-status-final.outputs.has_changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "docs(i18n): Automatic FR->EN Markdown translation updates for ${{ matrix.file.input_file }}"
+          commit_message: "docs(i18n): Automatic FR->EN Markdown translation updates"
           branch: main
