@@ -15,7 +15,7 @@
 
 ## Paths
 
-| **Catégorie**  | **Methode** | **Chemin**                          | **Description**                                      | **Permissions** |
+| **Category**  | **Method** | **Path**                          | **Description**                                      | **Permissions** |
 |--------------|----------|--------------------------------|--------------------------------------------------|----------------|
 | **Alerts**   | GET      | `/alerts`                     | Retrieve all alerts (with pagination and filters) | User |
 |              | GET      | `/alerts/:id`                 | Retrieve an alert by ID                         | User |
@@ -24,10 +24,10 @@
 |              | GET      | `/clients/:id`                | Retrieve a client by ID                           | User |
 |              | POST     | `/clients`                    | Create a new client                           | Admin |
 | **Users**    | GET      | `/users`                      | Retrieve all users                                 | Admin |
-|              | PATCH    | `/users/:id`             | Change the user (except their role)                              | Admin or l'user |
+|              | PATCH    | `/users/:id`             | Change the user (except their role)                              | Admin ou l'user |
 |              | PATCH    | `/users/:id/role`             | Change the user's role                              | Admin |
-|              | DELETE   | `/users/:id/session`          | Revoke a session token                    | Admin or l'user |
-|              | DELETE   | `/users/:id`                  | Delete a user                                 | Admin or l'user |
+|              | DELETE   | `/users/:id/session`          | Revoke a session token                    | Admin ou l'user |
+|              | DELETE   | `/users/:id`                  | Delete a user                                 | Admin ou l'user |
 | **Misc**     | GET      | `/certfr`                     | Retrieve alerts from CERT-FR                        | User |
 | **Auth**     | GET      | `/auth/refresh`               | Refresh the token and user info                     | User |
 | | GET      | `/auth/github`               | Auth with Github | User |
