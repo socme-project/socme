@@ -1,6 +1,6 @@
-# SOCME Backend app
+# SOCME Backend application
 
-## Règles
+## Rules
 
 - Le premier utilisateur créé est un admin
 - Lorsqu'un utilisateur est créé avec OAuth, nous lui avons donné le rôle "guest", il ne peut rien faire, il sera redirigé vers une page d'invité
@@ -13,7 +13,7 @@
 
 - Les utilisateurs peuvent s'authentifier en utilisant OAuth (GitHub)
 
-## Chemins
+## Paths
 
 | **Catégorie**  | **Methode** | **Chemin**                          | **Description**                                      | **Permissions** |
 |--------------|----------|--------------------------------|--------------------------------------------------|----------------|
