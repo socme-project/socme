@@ -15,7 +15,7 @@
 
 ## Paths
 
-| **Catégorie**  | **Methode** | **Chemin**                          | **Description**                                      | **Permissions** |
+| **Category**  | **Method** | **Path**                          | **Description**                                      | **Permissions** |
 |--------------|----------|--------------------------------|--------------------------------------------------|----------------|
 | **Alerts**   | GET      | `/alerts`                     | Récupérer toutes les alertes (avec pagination et filtres) | User |
 |              | GET      | `/alerts/:id`                 | Récupérer une alerte par ID                         | User |
