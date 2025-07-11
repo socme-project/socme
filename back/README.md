@@ -1,4 +1,4 @@
-# SOCME Backend application
+# SOCME Backend
 
 ## Rules
 
