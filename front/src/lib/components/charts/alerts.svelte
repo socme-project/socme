@@ -23,6 +23,8 @@
   } satisfies Chart.ChartConfig;
 
   let context = $state<ChartContextValue>();
+
+  // TODO: Float to int
 </script>
 
 <Chart.Container config={chartConfig}>

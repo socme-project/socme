@@ -2,15 +2,24 @@ export type Client = {
   ID: string;
   Name: string;
   Logo: string;
-  LastAlert: string;
-  WazuhIsAlive: boolean;
-  WazuhVersion: string;
-  WazuhIP: string;
+
+  Host: string;
+
+  SshPort: string;
+  SshUsername: string;
+  SshPassword: string;
+
   WazuhPort: string;
   WazuhUsername: string;
   WazuhPassword: string;
-  IndexerIP: string;
+
   IndexerPort: string;
   IndexerUsername: string;
   IndexerPassword: string;
+
+  LastAlert: string;
+  WazuhIsAlive: boolean;
+  WazuhVersion: string;
+  ConnectedAgents?: number;
+  DisconnectedAgents?: number;
 };

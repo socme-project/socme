@@ -14,11 +14,17 @@
         params: {
           name: client.Name,
           logo: client.Logo,
-          wazuh_ip: client.WazuhIP,
+
+          host: client.Host,
+
+          ssh_port: client.SshPort,
+          ssh_username: client.SshUsername,
+          ssh_password: client.SshPassword,
+
           wazuh_port: client.WazuhPort,
           wazuh_username: client.WazuhUsername,
           wazuh_password: client.WazuhPassword,
-          indexer_ip: client.IndexerIP,
+
           indexer_port: client.IndexerPort,
           indexer_username: client.IndexerUsername,
           indexer_password: client.IndexerPassword,
@@ -42,10 +48,34 @@
     <Label for="logo">Logo URL</Label>
     <Input id="logo" bind:value={client.Logo} class="col-span-3" />
   </div>
+
   <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="wazuh_ip">Wazuh IP</Label>
-    <Input id="wazuh_ip" bind:value={client.WazuhIP} class="col-span-3" />
+    <Label for="host">Host</Label>
+    <Input id="host" bind:value={client.Host} class="col-span-3" />
   </div>
+
+  <div class="grid grid-cols-4 items-center gap-4">
+    <Label for="ssh_port">Ssh Port</Label>
+    <Input id="ssh_port" bind:value={client.SshPort} class="col-span-3" />
+  </div>
+  <div class="grid grid-cols-4 items-center gap-4">
+    <Label for="ssh_username">Ssh Username</Label>
+    <Input
+      id="ssh_username"
+      bind:value={client.SshUsername}
+      class="col-span-3"
+    />
+  </div>
+  <div class="grid grid-cols-4 items-center gap-4">
+    <Label for="ssh_password">Ssh Password</Label>
+    <Input
+      type="password"
+      id="ssh_password"
+      bind:value={client.SshPassword}
+      class="col-span-3"
+    />
+  </div>
+
   <div class="grid grid-cols-4 items-center gap-4">
     <Label for="wazuh_port">Wazuh Port</Label>
     <Input id="wazuh_port" bind:value={client.WazuhPort} class="col-span-3" />
@@ -67,10 +97,7 @@
       class="col-span-3"
     />
   </div>
-  <div class="grid grid-cols-4 items-center gap-4">
-    <Label for="indexer_ip">Indexer IP</Label>
-    <Input id="indexer_ip" bind:value={client.IndexerIP} class="col-span-3" />
-  </div>
+
   <div class="grid grid-cols-4 items-center gap-4">
     <Label for="indexer_port">Indexer Port</Label>
     <Input

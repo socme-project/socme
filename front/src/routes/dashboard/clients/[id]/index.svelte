@@ -7,6 +7,8 @@
   import { onMount } from "svelte";
   import * as Avatar from "$lib/components/ui/avatar/index.js";
   import { ExternalLink, Eye, EyeOff, Ghost } from "@lucide/svelte";
+  import * as Card from "$lib/components/ui/card/index.js";
+  import Clients from "$src/lib/components/charts/clients.svelte";
   const id = route.params.id;
 
   let client = $state<Client | null>(null);
@@ -58,117 +60,148 @@
     </div>
   </div>
 
-  <table class="w-full text-left mt-10">
-    <tbody>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Wazuh version</th
-        >
-        <td>{client.WazuhVersion || "version unknown"}</td>
-      </tr>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Last alert</th
-        >
-        <td
-          >{client.LastAlert === "0001-01-01T00:00:00Z"
-            ? "timestamp unknown"
-            : client.LastAlert}</td
-        >
-      </tr>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Wazuh</th
-        >
-        <td
-          ><a
-            class="flex gap-2 items-center hover:underline"
-            href={client.WazuhIP + ":" + client.WazuhPort}
-            >{client.WazuhIP}:{client.WazuhPort} <ExternalLink size={12} /></a
-          ></td
-        >
-      </tr>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Wazuh username</th
-        >
-        <td>{client.WazuhUsername}</td>
-      </tr>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Wazuh password</th
-        >
-        <td
-          >{#if showWazuhPassword}
-            <p class="flex gap-2 items-center">
-              {client.WazuhPassword}<Eye
-                onclick={() => (showWazuhPassword = !showWazuhPassword)}
-                size={12}
-              />
-            </p>
-          {:else}
-            <p class="flex gap-2 items-center text-muted-foreground">
-              Password redacted
-              <EyeOff
-                onclick={() => (showWazuhPassword = !showWazuhPassword)}
-                size={12}
-              />
-            </p>
-          {/if}
-        </td>
-      </tr>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Indexer</th
-        >
-        <td
-          ><a
-            class="flex gap-2 items-center hover:underline"
-            href={client.IndexerIP + ":" + client.IndexerPort}
-            >{client.IndexerIP}:{client.IndexerPort}
-            <ExternalLink size={12} /></a
-          ></td
-        >
-      </tr>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Indexer username</th
-        >
-        <td>{client.IndexerUsername}</td>
-      </tr>
-      <tr>
-        <th
-          class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
-          >Indexer password</th
-        >
-        <td
-          >{#if showIndexerPassword}
-            <p class="flex gap-2 items-center">
-              {client.IndexerPassword}<Eye
-                onclick={() => (showIndexerPassword = !showIndexerPassword)}
-                size={12}
-              />
-            </p>
-          {:else}
-            <p class="flex gap-2 items-center text-muted-foreground">
-              Password redacted
-              <EyeOff
-                onclick={() => (showIndexerPassword = !showIndexerPassword)}
-                size={12}
-              />
-            </p>
-          {/if}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="grid col-span-2 md:col-span-2 gap-5">
+    <Card.Root class="flex flex-col">
+      <Card.Header class="items-center mb-6">
+        <Card.Title>Clients status</Card.Title>
+      </Card.Header>
+      <Card.Content class="flex-1">
+        <Clients
+          actif={client.ConnectedAgents || 0}
+          inactif={client.DisconnectedAgents || 0}
+        />
+      </Card.Content>
+    </Card.Root>
+
+    <Card.Root class="flex flex-col">
+      <Card.Header class="items-center mb-6">
+        <Card.Title>Client informations</Card.Title>
+      </Card.Header>
+      <Card.Content class="flex-1">
+        <table class="w-full text-left mt-10">
+          <tbody>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Wazuh version</th
+              >
+              <td>{client.WazuhVersion || "version unknown"}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Last alert</th
+              >
+              <td
+                >{client.LastAlert === "0001-01-01T00:00:00Z"
+                  ? "timestamp unknown"
+                  : client.LastAlert}</td
+              >
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Host</th
+              >
+              <td>{client.Host}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Wazuh</th
+              >
+              <td
+                ><a
+                  class="flex gap-2 items-center hover:underline"
+                  href={client.Host + ":" + client.WazuhPort}
+                  >{client.Host}:{client.WazuhPort}
+                  <ExternalLink size={12} /></a
+                ></td
+              >
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Wazuh username</th
+              >
+              <td>{client.WazuhUsername}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Wazuh password</th
+              >
+              <td
+                >{#if showWazuhPassword}
+                  <p class="flex gap-2 items-center">
+                    {client.WazuhPassword}<Eye
+                      onclick={() => (showWazuhPassword = !showWazuhPassword)}
+                      size={12}
+                    />
+                  </p>
+                {:else}
+                  <p class="flex gap-2 items-center text-muted-foreground">
+                    Password redacted
+                    <EyeOff
+                      onclick={() => (showWazuhPassword = !showWazuhPassword)}
+                      size={12}
+                    />
+                  </p>
+                {/if}
+              </td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Indexer</th
+              >
+              <td
+                ><a
+                  class="flex gap-2 items-center hover:underline"
+                  href={client.Host + ":" + client.IndexerPort}
+                  >{client.Host}:{client.IndexerPort}
+                  <ExternalLink size={12} /></a
+                ></td
+              >
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Indexer username</th
+              >
+              <td>{client.IndexerUsername}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Indexer password</th
+              >
+              <td
+                >{#if showIndexerPassword}
+                  <p class="flex gap-2 items-center">
+                    {client.IndexerPassword}<Eye
+                      onclick={() =>
+                        (showIndexerPassword = !showIndexerPassword)}
+                      size={12}
+                    />
+                  </p>
+                {:else}
+                  <p class="flex gap-2 items-center text-muted-foreground">
+                    Password redacted
+                    <EyeOff
+                      onclick={() =>
+                        (showIndexerPassword = !showIndexerPassword)}
+                      size={12}
+                    />
+                  </p>
+                {/if}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </Card.Content>
+    </Card.Root>
+  </div>
 {:else}
   <Loading />
 {/if}

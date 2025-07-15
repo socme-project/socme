@@ -47,11 +47,17 @@ func (r *routerType) clientRoutes() {
 		client, err := model.CreateClient(r.Db,
 			c.Query("name"),
 			c.Query("logo"),
-			c.Query("wazuh_ip"),
+
+			c.Query("host"),
+
+			c.Query("ssh_port"),
+			c.Query("ssh_username"),
+			c.Query("ssh_password"),
+
 			c.Query("wazuh_port"),
 			c.Query("wazuh_username"),
 			c.Query("wazuh_password"),
-			c.Query("indexer_ip"),
+
 			c.Query("indexer_port"),
 			c.Query("indexer_username"),
 			c.Query("indexer_password"),
@@ -72,11 +78,17 @@ func (r *routerType) clientRoutes() {
 			c.Param("id"),
 			c.Query("name"),
 			c.Query("logo"),
-			c.Query("wazuh_ip"),
+
+			c.Query("host"),
+
+			c.Query("ssh_port"),
+			c.Query("ssh_username"),
+			c.Query("ssh_password"),
+
 			c.Query("wazuh_port"),
 			c.Query("wazuh_username"),
 			c.Query("wazuh_password"),
-			c.Query("indexer_ip"),
+
 			c.Query("indexer_port"),
 			c.Query("indexer_username"),
 			c.Query("indexer_password"),

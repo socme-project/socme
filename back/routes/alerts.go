@@ -104,10 +104,6 @@ func (r *routerType) alertsRoutes() {
 
 		var alerts []model.Alert
 		query.Where("timestamp BETWEEN ? AND ?", start, end).Find(&alerts)
-		// FIXME: Is the timestamp thing good ?
-
-		// fmt.Println("\n\n---------------------------------------------")
-		// fmt.Println(len(alerts))
 
 		alertsPerHour := make([]int, 24)
 

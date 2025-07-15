@@ -33,11 +33,11 @@
           url: "/dashboard/clients",
           icon: Folder,
         },
-        {
-          title: "TV View",
-          url: "/tv-view",
-          icon: Tv,
-        },
+        // {
+        //   title: "TV View",
+        //   url: "/tv-view",
+        //   icon: Tv,
+        // },
         {
           title: "Cert-fr",
           url: "/dashboard/certfr",

@@ -8,7 +8,7 @@ import (
 	"github.com/socme-projects/backend/model"
 )
 
-func (r routerType) UpdateAlertsForClient(client model.Client) {
+func (r routerType) UpdateAlertsForClient(client model.Client) error {
 	r.Logger.Info("-- Retrieving alerts for " + client.Name)
 	lastID, err := r.GetLastAlertIdFromDb(client.ID)
 
@@ -16,17 +16,17 @@ func (r routerType) UpdateAlertsForClient(client model.Client) {
 		lastID = 0
 	} else if err != nil {
 		r.Logger.Error("Failed to retrieve last alert ID from db: " + err.Error())
-		return
+		return err
 	}
 	r.Logger.Info("Last ID: " + strconv.Itoa(lastID))
 
 	wazuhClient := wazuhapi.WazuhAPI{
-		Host:     client.WazuhIP,
+		Host:     client.Host,
 		Port:     client.WazuhPort,
 		Username: client.WazuhUsername,
 		Password: client.WazuhPassword,
 		Indexer: wazuhapi.Indexer{
-			Host:     client.IndexerIP,
+			Host:     client.Host,
 			Port:     client.IndexerPort,
 			Username: client.IndexerUsername,
 			Password: client.IndexerPassword,
@@ -37,34 +37,60 @@ func (r routerType) UpdateAlertsForClient(client model.Client) {
 	err = wazuhClient.RefreshToken()
 	if err != nil {
 		r.Logger.Error("Failed to refresh token: ", err.Error())
-		return
+		return err
 	}
 
 	alerts, _, err := wazuhClient.GetAlerts(lastID)
 	if err != nil {
 		r.Logger.Error("Failed to retrieve alerts: " + err.Error())
-		return
+		return err
 	} else if len(alerts) == 0 {
-		return
+		r.Logger.Info("No new alerts found for client " + client.Name)
+		return nil
 	}
 
 	err = r.AddAlertToDb(alerts, client.ID)
 	if err != nil {
 		r.Logger.Error("Failed to add alerts to db:", err)
-		return
+		return err
 	}
 
 	lastALert, err := time.Parse("2006-01-02T15:04:05.000-0700", alerts[len(alerts)-1].Timestamp)
 	if err != nil {
 		r.Logger.Error("Failed to parse last alert timestamp: " + err.Error())
-		return
+		return err
 	}
 	err = model.EditLastAlert(r.Db, client, lastALert)
 
 	if err != nil {
 		r.Logger.Error("Failed to update last alert timestamp in db: " + err.Error())
-		return
+		return err
 	}
+
+	// TODO: fastetch here
+	version, err := wazuhClient.GetApiVersion()
+	if err != nil {
+		r.Logger.Error("Failed to retrieve API version: ", err.Error())
+		return err
+	}
+	err = model.EditClientVersion(r.Db, client.ID, version)
+	if err != nil {
+		r.Logger.Error("Failed to update client version in db: ", err.Error())
+		return err
+	}
+
+	agents, err := wazuhClient.GetAgents()
+	if err != nil {
+		r.Logger.Error("Failed to retrieve agents status: ", err.Error())
+		return err
+	}
+	err = model.EditClientAgents(r.Db, client.ID, agents.Active, agents.Disconnected)
+	if err != nil {
+		r.Logger.Error("Failed to update client agents in db: ", err.Error())
+		return err
+	}
+
+	return nil
 }
 
 func (r routerType) UpdateAlerts() {
@@ -74,12 +100,18 @@ func (r routerType) UpdateAlerts() {
 		if err != nil {
 			r.Logger.Error("Failed to retrieve clients from db: ", err)
 			time.Sleep(r.RefreshRate)
+			continue
 		}
 		r.Logger.Info("Retrieving alerts for", len(clients), "clients: ", clients)
 		for _, client := range clients {
-			go r.UpdateAlertsForClient(client)
+			go func() {
+				err := r.UpdateAlertsForClient(client)
+				if err != nil {
+					model.EditClientStatus(r.Db, client.ID, false)
+				}
+				model.EditClientStatus(r.Db, client.ID, true)
+			}()
 		}
-		// TODO: fastetch here
 		time.Sleep(r.RefreshRate)
 	}
 }

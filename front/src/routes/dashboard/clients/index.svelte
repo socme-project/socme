@@ -109,10 +109,10 @@
           </Table.Cell
           >
           <Table.Cell>
-            {client.WazuhIP}:{client.WazuhPort}</Table.Cell
+            {client.Host}:{client.WazuhPort}</Table.Cell
           >
           <Table.Cell>
-            {client.IndexerIP}:{client.IndexerPort}</Table.Cell
+            {client.Host}:{client.IndexerPort}</Table.Cell
           >
           <Table.Cell>
             {client.WazuhVersion}</Table.Cell

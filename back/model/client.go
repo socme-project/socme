@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,23 +11,32 @@ import (
 )
 
 type Client struct {
-	ID     string `gorm:"primaryKey"`
-	Name   string `gorm:"unique;not null"`
-	Logo   string
-	Alerts []Alert `gorm:"foreignKey:ClientID"`
+	ID   string `gorm:"primaryKey"`
+	Name string `gorm:"unique;not null"`
+	Logo string
 
-	LastAlert time.Time
+	// Settings
+	Host string
 
-	WazuhIsAlive    bool
-	WazuhVersion    string
-	WazuhIP         string
-	WazuhPort       string
-	WazuhUsername   string
-	WazuhPassword   string
-	IndexerIP       string
+	SshPort     string
+	SshUsername string
+	SshPassword string
+
+	WazuhPort     string
+	WazuhUsername string
+	WazuhPassword string
+
 	IndexerPort     string
 	IndexerUsername string
 	IndexerPassword string
+
+	// Auto updated
+	LastAlert          time.Time
+	ConnectedAgents    int
+	DisconnectedAgents int
+	Alerts             []Alert `gorm:"foreignKey:ClientID"`
+	WazuhIsAlive       bool
+	WazuhVersion       string
 }
 
 func (c Client) String() string {
@@ -35,22 +45,35 @@ func (c Client) String() string {
 		"\tName: " + c.Name + "\n" +
 		"\tLogo: " + c.Logo + "\n" +
 		"\tWazuhVersion: " + c.WazuhVersion + "\n" +
-		"\tWazuhIP: " + c.WazuhIP + "\n" +
 		"\tWazuhPort: " + c.WazuhPort + "\n" +
 		"\tWazuhUsername: " + c.WazuhUsername + "\n" +
-		"\tIndexerIP: " + c.IndexerIP + "\n" +
 		"\tIndexerPort: " + c.IndexerPort + "\n" +
+		"\tIndexerUsername: " + c.IndexerUsername + "\n" +
+		"\tLastAlert: " + c.LastAlert.String() + "\n" +
+		"\tConnectedAgents: " + strconv.Itoa(c.ConnectedAgents) + "\n" +
+		"\tDisconnectedAgents: " + strconv.Itoa(c.DisconnectedAgents) + "\n" +
+		"\tWazuhIsAlive: " + strconv.FormatBool(c.WazuhIsAlive) + "\n" +
+		"\tHostIP: " + c.Host + "\n" +
+		"\tSshPort: " + c.SshPort + "\n" +
+		"\tSshUsername: " + c.SshUsername + "\n" +
+		"\tSshPassword: " + c.SshPassword + "\n" +
 		"}"
 }
 
 func CreateClient(db *gorm.DB,
 	Name string,
 	Logo string,
-	WazuhIP string,
+
+	Host string,
+
+	SshPort string,
+	SshUsername string,
+	SshPassword string,
+
 	WazuhPort string,
 	WazuhUsername string,
 	WazuhPassword string,
-	IndexerIP string,
+
 	IndexerPort string,
 	IndexerUsername string,
 	IndexerPassword string,
@@ -64,16 +87,16 @@ func CreateClient(db *gorm.DB,
 		return nil, errors.New("client name cannot be empty")
 	}
 
-	if utils.IsValidIpOrDomain(WazuhIP) == false {
-		return nil, errors.New("invalid Wazuh IP or domain")
+	if utils.IsValidIpOrDomain(Host) == false {
+		return nil, errors.New("invalid host IP or domain")
 	}
 
 	if utils.IsValidPort(WazuhPort) == false {
 		return nil, errors.New("invalid Wazuh port")
 	}
 
-	if utils.IsValidIpOrDomain(IndexerIP) == false {
-		return nil, errors.New("invalid indexer IP or domain")
+	if utils.IsValidPort(SshPort) == false {
+		return nil, errors.New("invalid SSH port")
 	}
 
 	if utils.IsValidPort(IndexerPort) == false {
@@ -88,15 +111,25 @@ func CreateClient(db *gorm.DB,
 		return nil, errors.New("Indexer username and password cannot be empty")
 	}
 
+	if SshUsername == "" || SshPassword == "" {
+		return nil, errors.New("SSH username and password cannot be empty")
+	}
+
 	client := Client{
-		ID:              uuid.String(),
-		Name:            Name,
-		Logo:            Logo,
-		WazuhIP:         WazuhIP,
-		WazuhPort:       WazuhPort,
-		WazuhUsername:   WazuhUsername,
-		WazuhPassword:   WazuhPassword,
-		IndexerIP:       IndexerIP,
+		ID:   uuid.String(),
+		Name: Name,
+		Logo: Logo,
+
+		Host: Host,
+
+		SshPort:     SshPort,
+		SshUsername: SshUsername,
+		SshPassword: SshPassword,
+
+		WazuhPort:     WazuhPort,
+		WazuhUsername: WazuhUsername,
+		WazuhPassword: WazuhPassword,
+
 		IndexerPort:     IndexerPort,
 		IndexerUsername: IndexerUsername,
 		IndexerPassword: IndexerPassword,
@@ -159,16 +192,22 @@ func EditLastAlert(db *gorm.DB, client Client, lastAlert time.Time) error {
 }
 
 func EditClient(db *gorm.DB, id string,
-	name string,
-	logo string,
-	wazuhIP string,
-	wazuhPort string,
-	wazuhUsername string,
-	wazuhPassword string,
-	indexerIP string,
-	indexerPort string,
-	indexerUsername string,
-	indexerPassword string,
+	Name string,
+	Logo string,
+
+	Host string,
+
+	SshPort string,
+	SshUsername string,
+	SshPassword string,
+
+	WazuhPort string,
+	WazuhUsername string,
+	WazuhPassword string,
+
+	IndexerPort string,
+	IndexerUsername string,
+	IndexerPassword string,
 ) (Client, error) {
 	client := Client{}
 	result := db.First(&client, "id = ?", id)
@@ -176,20 +215,69 @@ func EditClient(db *gorm.DB, id string,
 		return Client{}, result.Error
 	}
 
-	client.Name = name
-	client.Logo = logo
-	client.WazuhIP = wazuhIP
-	client.WazuhPort = wazuhPort
-	client.WazuhUsername = wazuhUsername
-	client.WazuhPassword = wazuhPassword
-	client.IndexerIP = indexerIP
-	client.IndexerPort = indexerPort
-	client.IndexerUsername = indexerUsername
-	client.IndexerPassword = indexerPassword
+	client.Name = Name
+	client.Logo = Logo
+
+	client.Host = Host
+
+	client.SshPort = SshPort
+	client.SshUsername = SshUsername
+	client.SshPassword = SshPassword
+
+	client.WazuhPort = WazuhPort
+	client.WazuhUsername = WazuhUsername
+	client.WazuhPassword = WazuhPassword
+
+	client.IndexerPort = IndexerPort
+	client.IndexerUsername = IndexerUsername
+	client.IndexerPassword = IndexerPassword
 
 	result = db.Save(&client)
 	if result.Error != nil {
 		return Client{}, result.Error
 	}
 	return client, nil
+}
+
+func EditClientAgents(db *gorm.DB, id string, connectedAgents int, disconnectedAgents int) error {
+	client := Client{}
+	result := db.First(&client, "id = ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+	client.ConnectedAgents = connectedAgents
+	client.DisconnectedAgents = disconnectedAgents
+	result = db.Save(&client)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func EditClientVersion(db *gorm.DB, id string, version string) error {
+	client := Client{}
+	result := db.First(&client, "id = ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+	client.WazuhVersion = version
+	result = db.Save(&client)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func EditClientStatus(db *gorm.DB, id string, isAlive bool) error {
+	client := Client{}
+	result := db.First(&client, "id = ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+	client.WazuhIsAlive = isAlive
+	result = db.Save(&client)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

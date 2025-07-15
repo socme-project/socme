@@ -1,7 +1,7 @@
 # Build front & backend
 build:
   mkdir -p "./build"
-  cd back && go build "./cmd/main.go" -o "../build/backend"
+  cd back && go build -o "../build/backend" "./cmd/main.go"
   cd front && bun run build && mv "./dist" "../build/frontend"
   echo "Build completed successfully."
 
