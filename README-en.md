@@ -20,7 +20,7 @@ This repository contains the main application, composed of:
 
 ## Installation
 
-### Installation manuelle
+### Manual Installation
 
 1. Clone the repository:
 
@@ -39,7 +39,7 @@ git clone https://github.com/socme-project/socme.git
 just build
 ```
 
-### Sur NixOS
+### On NixOS
 
 1. In the `flake.nix` file, add the `socme` directory in the `inputs` section and import the `socme.nixosModules.socme-backend` module:
 
