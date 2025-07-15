@@ -88,6 +88,7 @@
           Open: false, // Initialize dropdown state to closed
         })) as AlertWithOpen[];
         maxPage = res.data.maxPage;
+        currentPage = 1;
       })
       .catch((err) => {
         toast.error("Internal server error");
