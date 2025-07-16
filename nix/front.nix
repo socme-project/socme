@@ -21,7 +21,7 @@ in
 
     bunNix = ../front/bun.nix;
 
-    outputHash = "sha256-qMLP4fTfMFEar0gMswSAmDAQp7TY99BGrIA/Epjgnls=";
+    outputHash = "sha256-ybuje0uSUAk5IMmIPY6K5XN1ja4racEvKrJXirF1ah8=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
 
