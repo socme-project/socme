@@ -1,4 +1,4 @@
-module github.com/socme-projects/backend
+module github.com/socme-project/backend
 
 go 1.24.3
 
