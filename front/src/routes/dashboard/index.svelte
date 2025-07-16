@@ -118,7 +118,11 @@
       <Card.Title>Clients status</Card.Title>
     </Card.Header>
     <Card.Content class="flex-1">
-      <Clients actif={activeClients} inactif={inactiveClients} />
+      {#if activeClients === 0 && inactiveClients === 0}
+        <Clients actif={activeClients} inactif={inactiveClients} />
+      {:else}
+        <Clients actif={activeClients} inactif={inactiveClients} />
+      {/if}
     </Card.Content>
   </Card.Root>
 
@@ -127,7 +131,11 @@
       <Card.Title>Total agents status</Card.Title>
     </Card.Header>
     <Card.Content class="flex-1">
-      <Clients actif={activeAgents} inactif={inactiveAgents} />
+      {#if activeAgents === 0 && inactiveAgents === 0}
+        <Clients actif={activeAgents} inactif={inactiveAgents} />
+      {:else}
+        <Clients actif={activeAgents} inactif={inactiveAgents} />
+      {/if}
     </Card.Content>
   </Card.Root>
 
@@ -139,9 +147,9 @@
     </Card.Header>
     <Card.Content class="flex-1 grid items-end">
       {#if statsLow.length === 0}
-        <Alerts alerts={statsLow} hexColor="oklch(0.70 0.19 48)" />
+        <Alerts alerts={statsLow} hexColor="oklch(0.55 0.02 264)" />
       {:else}
-        <Alerts alerts={statsLow} hexColor="oklch(0.70 0.19 48)" />
+        <Alerts alerts={statsLow} hexColor="oklch(0.55 0.02 264)" />
       {/if}
     </Card.Content>
   </Card.Root>
@@ -161,7 +169,7 @@
     </Card.Content>
   </Card.Root>
 
-  <Card.Root class="flex flex-col">
+  <Card.Root class="flex flex-col xl:col-span-2">
     <Card.Header class="items-center mb-6">
       <Card.Title class="flex gap-1 items-center "
         ><SignalHigh /> High severity</Card.Title
@@ -176,7 +184,7 @@
     </Card.Content>
   </Card.Root>
 
-  <Card.Root class="flex flex-col">
+  <Card.Root class="flex flex-col xl:col-span-2">
     <Card.Header class="items-center mb-6">
       <Card.Title class="flex gap-1 items-center "
         ><Signal /> Critical severity</Card.Title
