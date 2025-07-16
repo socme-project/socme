@@ -197,6 +197,84 @@
                 {/if}
               </td>
             </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >OS</th
+              >
+              <td>{client.Information?.Os}</td>
+            </tr>
+
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Host</th
+              >
+              <td>{client.Information?.Host}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Kernel</th
+              >
+              <td>{client.Information?.Kernel}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >CPU</th
+              >
+              <td>{client.Information?.CPU.join(", ")}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >GPU</th
+              >
+              <td>{client.Information?.GPU.join(", ")}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Local IP</th
+              >
+              <td>{client.Information?.IP}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Uptime</th
+              >
+              <td>{client.Information?.Uptime}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Disk</th
+              >
+              <td>{client.Information?.Disk}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Memory</th
+              >
+              <td>{client.Information?.Memory}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Swap</th
+              >
+              <td>{client.Information?.Swap}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >CPU Usage</th
+              >
+              <td>{client.Information?.CPUUsage}</td>
+            </tr>
           </tbody>
         </table>
       </Card.Content>

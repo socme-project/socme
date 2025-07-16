@@ -22,4 +22,20 @@ export type Client = {
   WazuhVersion: string;
   ConnectedAgents?: number;
   DisconnectedAgents?: number;
+
+  Information?: {
+    Os: string;
+    Host: string;
+    Kernel: string;
+    CPU: string[];
+    GPU: string[];
+
+    IP: string;
+    Uptime: string;
+
+    Disk: string;
+    Memory: string;
+    Swap: string;
+    CPUUsage: string;
+  };
 };

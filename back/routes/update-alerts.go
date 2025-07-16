@@ -67,7 +67,7 @@ func (r routerType) UpdateAlertsForClient(client model.Client) error {
 		return err
 	}
 
-	// TODO: fastetch here
+	// TODO: fastetch here (waiting for opsme integration)
 	version, err := wazuhClient.GetApiVersion()
 	if err != nil {
 		r.Logger.Error("Failed to retrieve API version: ", err.Error())

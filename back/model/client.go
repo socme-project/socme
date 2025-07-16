@@ -37,6 +37,22 @@ type Client struct {
 	Alerts             []Alert `gorm:"foreignKey:ClientID"`
 	WazuhIsAlive       bool
 	WazuhVersion       string
+
+	Information struct {
+		Os     string
+		Host   string
+		Kernel string
+		CPU    []string
+		GPU    []string
+
+		IP     string
+		Uptime string
+
+		Disk     string
+		Memory   string
+		Swap     string
+		CPUUsage string
+	}
 }
 
 func (c Client) String() string {
@@ -275,6 +291,48 @@ func EditClientStatus(db *gorm.DB, id string, isAlive bool) error {
 		return result.Error
 	}
 	client.WazuhIsAlive = isAlive
+	result = db.Save(&client)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func EditClientInformation(db *gorm.DB, id string,
+	Os string,
+	Host string,
+	Kernel string,
+	CPU []string,
+	GPU []string,
+
+	IP string,
+	Uptime string,
+
+	Disk string,
+	Memory string,
+	Swap string,
+	CPUUsage string,
+) error {
+	client := Client{}
+	result := db.First(&client, "id = ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	client.Information.Os = Os
+	client.Information.Host = Host
+	client.Information.Kernel = Kernel
+	client.Information.CPU = CPU
+	client.Information.GPU = GPU
+
+	client.Information.IP = IP
+	client.Information.Uptime = Uptime
+
+	client.Information.Disk = Disk
+	client.Information.Memory = Memory
+	client.Information.Swap = Swap
+	client.Information.CPUUsage = CPUUsage
+
 	result = db.Save(&client)
 	if result.Error != nil {
 		return result.Error
