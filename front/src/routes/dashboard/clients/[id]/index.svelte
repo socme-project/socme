@@ -247,7 +247,7 @@
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >OS</th
               >
-              <td>{client.Information?.Os}</td>
+              <td>{client.Os}</td>
             </tr>
 
             <tr>
@@ -255,70 +255,70 @@
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >Host</th
               >
-              <td>{client.Information?.Host}</td>
+              <td>{client.Host}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >Kernel</th
               >
-              <td>{client.Information?.Kernel}</td>
+              <td>{client.Kernel}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >CPU</th
               >
-              <td>{client.Information?.CPU}</td>
+              <td>{client.CPU}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >GPU</th
               >
-              <td>{client.Information?.GPU}</td>
+              <td>{client.GPU}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >Local IP</th
               >
-              <td>{client.Information?.IP}</td>
+              <td>{client.IP}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >Uptime</th
               >
-              <td>{client.Information?.Uptime}</td>
+              <td>{client.Uptime}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >Disk</th
               >
-              <td>{client.Information?.Disk}</td>
+              <td>{client.Disk}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >Memory</th
               >
-              <td>{client.Information?.Memory}</td>
+              <td>{client.Memory}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >Swap</th
               >
-              <td>{client.Information?.Swap}</td>
+              <td>{client.Swap}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >CPU Usage</th
               >
-              <td>{client.Information?.CPUUsage}</td>
+              <td>{client.CPUUsage}</td>
             </tr>
           </tbody>
         </table>

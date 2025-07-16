@@ -38,21 +38,19 @@ type Client struct {
 	WazuhIsAlive       bool
 	WazuhVersion       string
 
-	Information struct {
-		Os     string
-		Host   string
-		Kernel string
-		CPU    string
-		GPU    string
+	Os          string
+	MachineHost string
+	Kernel      string
+	CPU         string
+	GPU         string
 
-		IP     string
-		Uptime string
+	IP     string
+	Uptime string
 
-		Disk     string
-		Memory   string
-		Swap     string
-		CPUUsage string
-	}
+	Disk     string
+	Memory   string
+	Swap     string
+	CPUUsage string
 }
 
 func (c Client) String() string {
@@ -300,7 +298,7 @@ func EditClientStatus(db *gorm.DB, id string, isAlive bool) error {
 
 func EditClientInformation(db *gorm.DB, id string,
 	Os string,
-	Host string,
+	MachineHost string,
 	Kernel string,
 	CPU string,
 	GPU string,
@@ -319,19 +317,19 @@ func EditClientInformation(db *gorm.DB, id string,
 		return result.Error
 	}
 
-	client.Information.Os = Os
-	client.Information.Host = Host
-	client.Information.Kernel = Kernel
-	client.Information.CPU = CPU
-	client.Information.GPU = GPU
+	client.Os = Os
+	client.MachineHost = MachineHost
+	client.Kernel = Kernel
+	client.CPU = CPU
+	client.GPU = GPU
 
-	client.Information.IP = IP
-	client.Information.Uptime = Uptime
+	client.IP = IP
+	client.Uptime = Uptime
 
-	client.Information.Disk = Disk
-	client.Information.Memory = Memory
-	client.Information.Swap = Swap
-	client.Information.CPUUsage = CPUUsage
+	client.Disk = Disk
+	client.Memory = Memory
+	client.Swap = Swap
+	client.CPUUsage = CPUUsage
 
 	result = db.Save(&client)
 	if result.Error != nil {

@@ -23,19 +23,17 @@ export type Client = {
   ConnectedAgents?: number;
   DisconnectedAgents?: number;
 
-  Information?: {
-    Os: string;
-    Host: string;
-    Kernel: string;
-    CPU: string;
-    GPU: string;
+  Os?: string;
+  MachineHost?: string;
+  Kernel?: string;
+  CPU?: string;
+  GPU?: string;
 
-    IP: string;
-    Uptime: string;
+  IP?: string;
+  Uptime?: string;
 
-    Disk: string;
-    Memory: string;
-    Swap: string;
-    CPUUsage: string;
-  };
+  Disk?: string;
+  Memory?: string;
+  Swap?: string;
+  CPUUsage?: string;
 };
