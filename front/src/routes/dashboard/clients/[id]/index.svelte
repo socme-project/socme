@@ -269,14 +269,14 @@
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >CPU</th
               >
-              <td>{client.Information?.CPU.join(", ")}</td>
+              <td>{client.Information?.CPU}</td>
             </tr>
             <tr>
               <th
                 class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
                 >GPU</th
               >
-              <td>{client.Information?.GPU.join(", ")}</td>
+              <td>{client.Information?.GPU}</td>
             </tr>
             <tr>
               <th

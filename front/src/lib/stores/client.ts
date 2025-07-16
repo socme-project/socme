@@ -27,8 +27,8 @@ export type Client = {
     Os: string;
     Host: string;
     Kernel: string;
-    CPU: string[];
-    GPU: string[];
+    CPU: string;
+    GPU: string;
 
     IP: string;
     Uptime: string;

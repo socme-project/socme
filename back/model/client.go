@@ -42,8 +42,8 @@ type Client struct {
 		Os     string
 		Host   string
 		Kernel string
-		CPU    []string
-		GPU    []string
+		CPU    string
+		GPU    string
 
 		IP     string
 		Uptime string
@@ -302,8 +302,8 @@ func EditClientInformation(db *gorm.DB, id string,
 	Os string,
 	Host string,
 	Kernel string,
-	CPU []string,
-	GPU []string,
+	CPU string,
+	GPU string,
 
 	IP string,
 	Uptime string,
