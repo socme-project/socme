@@ -71,6 +71,12 @@
           actif={client.ConnectedAgents || 0}
           inactif={client.DisconnectedAgents || 0}
         />
+        {#if client.ConnectedAgents && client.DisconnectedAgents}
+          <p>
+            {client.ConnectedAgents}/{client.ConnectedAgents +
+              client.DisconnectedAgents} active agents
+          </p>
+        {/if}
       </Card.Content>
     </Card.Root>
 

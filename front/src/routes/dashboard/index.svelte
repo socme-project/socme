@@ -15,6 +15,7 @@
   import { onMount } from "svelte";
   import Badge from "$src/lib/components/ui/badge/badge.svelte";
   import type { Alert } from "$src/lib/components/alerts/columns";
+    import EditClient from "$src/lib/components/edit-client.svelte";
 
   let statsLow = $state([]);
   let statsMedium = $state([]);
@@ -122,6 +123,7 @@
         <Clients actif={activeClients} inactif={inactiveClients} />
       {:else}
         <Clients actif={activeClients} inactif={inactiveClients} />
+        <p>{activeClients}/{activeClients+inactiveClients} active client</p>
       {/if}
     </Card.Content>
   </Card.Root>
@@ -135,6 +137,7 @@
         <Clients actif={activeAgents} inactif={inactiveAgents} />
       {:else}
         <Clients actif={activeAgents} inactif={inactiveAgents} />
+        <p>{activeAgents}/{activeAgents+inactiveAgents} active agents</p>
       {/if}
     </Card.Content>
   </Card.Root>
