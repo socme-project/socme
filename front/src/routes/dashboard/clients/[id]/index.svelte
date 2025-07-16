@@ -13,6 +13,7 @@
 
   let client = $state<Client | null>(null);
 
+  let showSshPassword = $state(false);
   let showWazuhPassword = $state(false);
   let showIndexerPassword = $state(false);
 
@@ -104,6 +105,44 @@
                 >Host</th
               >
               <td>{client.Host}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Ssh port</th
+              >
+              <td>{client.SshPort}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Ssh username</th
+              >
+              <td>{client.SshUsername}</td>
+            </tr>
+            <tr>
+              <th
+                class="w-[220px] text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0"
+                >Ssh password</th
+              >
+              <td
+                >{#if showSshPassword}
+                  <p class="flex gap-2 items-center">
+                    {client.SshPassword}<Eye
+                      onclick={() => (showSshPassword = !showSshPassword)}
+                      size={12}
+                    />
+                  </p>
+                {:else}
+                  <p class="flex gap-2 items-center text-muted-foreground">
+                    Password redacted
+                    <EyeOff
+                      onclick={() => (showSshPassword = !showSshPassword)}
+                      size={12}
+                    />
+                  </p>
+                {/if}
+              </td>
             </tr>
             <tr>
               <th
