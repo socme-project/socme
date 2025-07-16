@@ -5,7 +5,7 @@ import (
 	"time"
 
 	wazuhapi "github.com/socme-project/wazuh-go"
-	"github.com/socme-projects/backend/model"
+	"github.com/socme-project/backend/model"
 )
 
 func (r routerType) UpdateAlertsForClient(client model.Client) error {

@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/socme-projects/backend/model"
+	"github.com/socme-project/backend/model"
 )
 
 func (r *routerType) clientRoutes() {
@@ -62,7 +62,6 @@ func (r *routerType) clientRoutes() {
 			c.Query("indexer_username"),
 			c.Query("indexer_password"),
 		)
-
 		if err != nil {
 			c.JSON(500, gin.H{"message": err.Error()})
 			r.Logger.Error("Failed to create client", "error", err.Error())
@@ -93,7 +92,6 @@ func (r *routerType) clientRoutes() {
 			c.Query("indexer_username"),
 			c.Query("indexer_password"),
 		)
-
 		if err != nil {
 			c.JSON(500, gin.H{"message": "Failed to edit client."})
 			r.Logger.Error("Failed to edit client", "error", err.Error())
@@ -103,5 +101,4 @@ func (r *routerType) clientRoutes() {
 		c.JSON(200, gin.H{"client": client})
 		r.Logger.Info("Client edited successfully", "client_id", client.ID)
 	})
-
 }

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/socme-projects/backend/model"
+	"github.com/socme-project/backend/model"
 
 	"github.com/lithammer/fuzzysearch/fuzzy"
 )
@@ -57,7 +57,6 @@ func (r *routerType) alertsRoutes() {
 			http.StatusOK,
 			gin.H{"alerts": alerts, "maxPage": totalNumberOfPages, "message": "Alerts retrieved."},
 		)
-
 	})
 
 	g.GET(":id", r.RoleMiddleware(), func(c *gin.Context) {
@@ -117,7 +116,10 @@ func (r *routerType) alertsRoutes() {
 		var alertsPerHour12 []int
 
 		for i := 0; i < 24; i += 4 {
-			alertsPerHour12 = append(alertsPerHour12, alertsPerHour[i]+alertsPerHour[i+1]+alertsPerHour[i+2]+alertsPerHour[i+3])
+			alertsPerHour12 = append(
+				alertsPerHour12,
+				alertsPerHour[i]+alertsPerHour[i+1]+alertsPerHour[i+2]+alertsPerHour[i+3],
+			)
 		}
 
 		c.JSON(

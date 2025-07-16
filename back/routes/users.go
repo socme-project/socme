@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/socme-projects/backend/model"
+	"github.com/socme-project/backend/model"
 )
 
 func (r *routerType) userRoutes() {

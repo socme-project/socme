@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/socme-projects/backend/routes"
+	"github.com/socme-project/backend/routes"
 )
 
 func InitRouter(api *API) *gin.Engine {

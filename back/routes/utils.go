@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/socme-projects/backend/model"
+	"github.com/socme-project/backend/model"
 )
 
 func GetTokenFromCookie(c *gin.Context) (string, error) {

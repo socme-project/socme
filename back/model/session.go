@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/socme-projects/backend/utils"
+	"github.com/socme-project/backend/utils"
 	"gorm.io/gorm"
 )
 

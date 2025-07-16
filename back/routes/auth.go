@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/socme-projects/backend/model"
-	"github.com/socme-projects/backend/utils"
+	"github.com/socme-project/backend/model"
+	"github.com/socme-project/backend/utils"
 )
 
 var SESSION_COOKIE_NAME = "session"

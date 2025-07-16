@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/socme-projects/backend/utils"
+	"github.com/socme-project/backend/utils"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 
@@ -55,7 +55,9 @@ func NewApi() API {
 		logger.Fatal("Failed to initialize database: ", err)
 	}
 
-	refreshRate, err := time.ParseDuration(utils.GetStringOrDefault(os.Getenv("ALERT_RETRIEVAL_INTERVAL"), "5m"))
+	refreshRate, err := time.ParseDuration(
+		utils.GetStringOrDefault(os.Getenv("ALERT_RETRIEVAL_INTERVAL"), "5m"),
+	)
 	if err != nil {
 		logger.Fatal("Failed to parse ALERT_RETRIEVAL_INTERVAL: ", err)
 	}

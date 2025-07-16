@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/socme-projects/backend/model"
+	"github.com/socme-project/backend/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

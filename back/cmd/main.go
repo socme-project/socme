@@ -1,6 +1,6 @@
 package main
 
-import api "github.com/socme-projects/backend"
+import api "github.com/socme-project/backend"
 
 func main() {
 	a := api.NewApi()
