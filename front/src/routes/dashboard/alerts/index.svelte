@@ -64,7 +64,7 @@
   let shownAlerts = $state<AlertWithOpen[] | null>(null);
   let currentPage = $state(1);
   let maxPage = $state(1);
-  let perPage = $state("10");
+  let perPage = $state("20");
   let searchFilter = $state("");
   let severityFilter = $state<string[]>([]);
   let clientFilter = $state<string>("");
@@ -88,7 +88,6 @@
           Open: false, // Initialize dropdown state to closed
         })) as AlertWithOpen[];
         maxPage = res.data.maxPage;
-        currentPage = 1;
       })
       .catch((err) => {
         toast.error("Internal server error");
@@ -140,7 +139,7 @@
   </div>
 </div>
 
-<div class="my-10 flex gap-2 flex-wrap">
+<div class="my-10 flex gap-2 flex-wrap w-full">
   <Input
     bind:value={searchFilter}
     placeholder="Filter tasks..."
@@ -166,6 +165,7 @@
     variant="ghost"
     onclick={() => {
       loadAlerts();
+      currentPage = 1;
     }}
     ><Search />
   </Button>

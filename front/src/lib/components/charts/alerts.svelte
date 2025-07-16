@@ -9,7 +9,13 @@
     hexColor,
   }: { alerts: number[]; hexColor: string } = $props();
 
-  const chartData = [
+  // TODO: Float to int
+  type dataType = {
+    hour: string;
+    count: number;
+  };
+
+  const chartData: dataType[] = [
     { hour: "-20h", count: alerts[0] },
     { hour: "-16h", count: alerts[1] },
     { hour: "-12h", count: alerts[2] },
@@ -23,8 +29,6 @@
   } satisfies Chart.ChartConfig;
 
   let context = $state<ChartContextValue>();
-
-  // TODO: Float to int
 </script>
 
 <Chart.Container config={chartConfig}>

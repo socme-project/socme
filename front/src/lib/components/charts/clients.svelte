@@ -19,18 +19,17 @@
 {#if actif === 0 && inactif === 0}
   <p class="text-muted-foreground text-center">No data available</p>
 {:else}
-  <Chart.Container config={chartConfig} class="mx-auto aspect-square w-1/2">
+  <Chart.Container config={chartConfig} class="mx-auto aspect-square w-1/2 max-w-60">
     <PieChart
       data={chartData}
       key="status"
       value="count"
       cRange={chartData.map((d) => d.color)}
       c="color"
-      props={{
-        pie: {
-          motion: "tween",
-        },
-      }}
+
+        innerRadius={60}
+        padding={29}
+        props={{ pie: { motion: "tween" } }}
     >
       {#snippet tooltip()}
         <Chart.Tooltip hideLabel />

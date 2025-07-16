@@ -126,6 +126,56 @@ func (r *routerType) alertsRoutes() {
 		)
 	})
 
+	g.GET("stats/agents", r.RoleMiddleware(), func(c *gin.Context) {
+		activeAgents := 0
+		inactiveAgents := 0
+		clients, err := model.GetAllClients(r.Db)
+		if err != nil {
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"message": "Failed to retrieve clients.", "error": err.Error()},
+			)
+			return
+		}
+
+		for _, client := range clients {
+			activeAgents += client.ConnectedAgents
+			inactiveAgents += client.DisconnectedAgents
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"activeAgents":   activeAgents,
+			"inactiveAgents": inactiveAgents,
+			"message":        "Clients stats retrieved.",
+		})
+	})
+
+	g.GET("stats/clients", r.RoleMiddleware(), func(c *gin.Context) {
+		activeClients := 0
+		inactiveClients := 0
+		clients, err := model.GetAllClients(r.Db)
+		if err != nil {
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"message": "Failed to retrieve clients.", "error": err.Error()},
+			)
+			return
+		}
+
+		for _, client := range clients {
+			if client.WazuhIsAlive {
+				activeClients++
+			} else {
+				inactiveClients++
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"activeClients":   activeClients,
+			"inactiveClients": inactiveClients,
+			"message":         "Clients stats retrieved.",
+		})
+	})
 }
 
 // dorks -> ruleid rulelevel description(no need cause already implied)

@@ -29,7 +29,7 @@
 </script>
 
 {#if client}
-  <div class="flex flex-wrap gap-5 justify-start items-center mt-4">
+  <div class="flex flex-wrap gap-5 justify-start items-center my-4">
     <Avatar.Root class="h-14 w-14 rounded-full">
       <Avatar.Image
         class="rounded-full"
@@ -60,12 +60,12 @@
     </div>
   </div>
 
-  <div class="grid col-span-2 md:col-span-2 gap-5">
+  <div class="grid xl:grid-cols-2 grid-cols-1 gap-5">
     <Card.Root class="flex flex-col">
-      <Card.Header class="items-center mb-6">
-        <Card.Title>Clients status</Card.Title>
+      <Card.Header class="items-center">
+        <Card.Title>Agents status</Card.Title>
       </Card.Header>
-      <Card.Content class="flex-1">
+      <Card.Content class="flex-1 items-center flex">
         <Clients
           actif={client.ConnectedAgents || 0}
           inactif={client.DisconnectedAgents || 0}
@@ -74,11 +74,11 @@
     </Card.Root>
 
     <Card.Root class="flex flex-col">
-      <Card.Header class="items-center mb-6">
+      <Card.Header class="items-center">
         <Card.Title>Client informations</Card.Title>
       </Card.Header>
       <Card.Content class="flex-1">
-        <table class="w-full text-left mt-10">
+        <table class="w-full text-left">
           <tbody>
             <tr>
               <th

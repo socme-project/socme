@@ -1,5 +1,4 @@
 <script lang="ts">
-  import * as Chart from "$lib/components/ui/chart/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
   import Alerts from "$src/lib/components/charts/alerts.svelte";
   import Button from "$src/lib/components/ui/button/button.svelte";
@@ -9,6 +8,7 @@
     SignalHigh,
     Signal,
     LayoutDashboard,
+    SignalLow,
   } from "@lucide/svelte";
   import { sendError } from "$src/lib/utils";
   import axios from "axios";
@@ -16,26 +16,43 @@
   import Badge from "$src/lib/components/ui/badge/badge.svelte";
   import type { Alert } from "$src/lib/components/alerts/columns";
 
-  // TODO: Refresh every 5 minutes
-  const agentData = [
-    { status: "actif", count: 45, color: "var(--color-green-500)" },
-    { status: "inactif", count: 12, color: "var(--color-red-500)" },
-  ];
-
-  const chartConfig = {
-    count: { label: "Nombre d'agents" },
-    actif: { label: "Actif", color: "var(--chart-1)" },
-    inactif: { label: "Inactif", color: "var(--chart-2)" },
-  } satisfies Chart.ChartConfig;
-
-  const totalAgents = agentData.reduce((acc, curr) => acc + curr.count, 0);
-
+  let statsLow = $state([]);
   let statsMedium = $state([]);
   let statsHigh = $state([]);
   let statsCritical = $state([]);
   let lastAlerts = $state<Alert[]>([]);
+  let activeAgents = $state<number>(0);
+  let inactiveAgents = $state<number>(0);
+  let activeClients = $state<number>(0);
+  let inactiveClients = $state<number>(0);
 
   async function loadStats() {
+    axios
+      .get("/api/alerts/stats/agents")
+      .then((response) => {
+        activeAgents = response.data.activeAgents;
+        inactiveAgents = response.data.inactiveAgents;
+      })
+      .catch((error) => {
+        sendError("Error fetching stats:", error);
+      });
+    axios
+      .get("/api/alerts/stats/clients")
+      .then((response) => {
+        activeClients = response.data.activeClients;
+        inactiveClients = response.data.inactiveClients;
+      })
+      .catch((error) => {
+        sendError("Error fetching stats:", error);
+      });
+    axios
+      .get("/api/alerts/stats/low")
+      .then((response) => {
+        statsLow = response.data.events;
+      })
+      .catch((error) => {
+        sendError("Error fetching stats:", error);
+      });
     axios
       .get("/api/alerts/stats/medium")
       .then((response) => {
@@ -81,6 +98,12 @@
 
   onMount(async () => {
     loadStats();
+    setInterval(
+      () => {
+        loadStats();
+      },
+      5 * 60 * 1000,
+    );
   });
 </script>
 
@@ -89,13 +112,37 @@
   Dashboard
 </h1>
 
-<div class="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-5">
+<div class="grid xl:grid-cols-4 lg:grid-cols-2 grid-cols-1 gap-5">
   <Card.Root class="flex flex-col">
     <Card.Header class="items-center mb-6">
       <Card.Title>Clients status</Card.Title>
     </Card.Header>
     <Card.Content class="flex-1">
-      <Clients actif={12} inactif={2} />
+      <Clients actif={activeClients} inactif={inactiveClients} />
+    </Card.Content>
+  </Card.Root>
+
+  <Card.Root class="flex flex-col">
+    <Card.Header class="items-center mb-6">
+      <Card.Title>Total agents status</Card.Title>
+    </Card.Header>
+    <Card.Content class="flex-1">
+      <Clients actif={activeAgents} inactif={inactiveAgents} />
+    </Card.Content>
+  </Card.Root>
+
+  <Card.Root class="flex flex-col">
+    <Card.Header class="items-center mb-6">
+      <Card.Title class="flex gap-1 items-center "
+        ><SignalLow /> Low severity</Card.Title
+      >
+    </Card.Header>
+    <Card.Content class="flex-1 grid items-end">
+      {#if statsLow.length === 0}
+        <Alerts alerts={statsLow} hexColor="oklch(0.70 0.19 48)" />
+      {:else}
+        <Alerts alerts={statsLow} hexColor="oklch(0.70 0.19 48)" />
+      {/if}
     </Card.Content>
   </Card.Root>
 
