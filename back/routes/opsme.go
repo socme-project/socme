@@ -212,6 +212,8 @@ func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
 		return opsme.Operator{}, []error{err}
 	}
 
+	operator.WithKnownHostsPath(knownHostsPath)
+
 	errors := make([]error, len(clients))
 
 	for i, client := range clients {
