@@ -52,4 +52,5 @@ func InitRoutes(
 	r.userRoutes()
 	r.clientRoutes()
 	r.miscRoutes()
+	r.opsmeRoutes()
 }
