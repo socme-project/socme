@@ -10,6 +10,7 @@ import (
 	"github.com/socme-project/opsme"
 )
 
+// isNillArray checks if all items in a slice of errors are nil.
 func isNillArray(arr []error) bool {
 	for _, item := range arr {
 		if item != nil {
@@ -17,6 +18,17 @@ func isNillArray(arr []error) bool {
 		}
 	}
 	return true
+}
+
+// serializeErrors converts a slice of errors into a slice of strings,
+func serializeErrors(errs []error) []string {
+	errorStrings := make([]string, 0)
+	for _, err := range errs {
+		if err != nil {
+			errorStrings = append(errorStrings, err.Error())
+		}
+	}
+	return errorStrings
 }
 
 func (r *routerType) opsmeRoutes() {
@@ -40,7 +52,7 @@ func (r *routerType) opsmeRoutes() {
 				http.StatusInternalServerError,
 				gin.H{
 					"message": "Clients were updated. Some could not be updated.",
-					"error":   errors,
+					"error": serializeErrors(errors),
 				})
 			return
 		}
@@ -97,7 +109,7 @@ func (r *routerType) opsmeRoutes() {
 				gin.H{
 					"message": "Some clients could not be fetched.",
 					"data":    fetchOutputs,
-					"error":   errors,
+					"error": serializeErrors(errors),
 				})
 			return
 		}
@@ -197,3 +209,4 @@ func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
 
 	return operator, errors
 }
+
