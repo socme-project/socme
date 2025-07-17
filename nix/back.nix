@@ -4,7 +4,7 @@ let
     pname = "socme-backend";
     version = "0.1.0";
     src = ../back;
-    vendorHash = "";
+    vendorHash = "sha256-aLVzfZmvoseaAgyh97vr0/cgrcrcYlE8PfICaJxz0Kw=";
   };
 in {
   package = socmeBackend;
