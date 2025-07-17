@@ -9,6 +9,15 @@ import (
 	"github.com/socme-project/opsme"
 )
 
+func isNillArray(arr []error) bool {
+	for _, item := range arr {
+		if item != nil {
+			return false
+		}
+	}
+	return true
+}
+
 func (r *routerType) opsmeRoutes() {
 	g := r.R.Group("/opsme")
 
@@ -22,25 +31,20 @@ func (r *routerType) opsmeRoutes() {
 			return
 		}
 
-		updateOutput, errors := UpdateClients(clients)
-		if len(errors) > 0 {
-			errorMessages := make([]string, len(errors))
-			for i, err := range errors {
-				errorMessages[i] = err.Error()
-			}
+		errors := UpdateClients(clients)
+		if !isNillArray(errors) {
 			c.JSON(
 				http.StatusInternalServerError,
 				gin.H{
-					"message": "Some clients could not be updated.",
-					"error":   errorMessages,
-					"data":    updateOutput,
+					"message": "Clients were updated. Some could not be updated.",
+					"error":   errors,
 				})
 			return
 		}
 
 		c.JSON(
 			http.StatusOK,
-			gin.H{"message": "Clients updated successfully.", "data": updateOutput},
+			gin.H{"message": "Clients updated successfully."},
 		)
 	})
 
@@ -55,19 +59,21 @@ func (r *routerType) opsmeRoutes() {
 			return
 		}
 
-		updateOutput, errors := UpdateClients(
+		errors := UpdateClients(
 			[]model.Client{*client},
 		)
-		if len(errors) > 0 {
+
+		if !isNillArray(errors) {
 			c.JSON(
 				http.StatusInternalServerError,
 				gin.H{"message": "Failed to update client.", "error": errors[0].Error()},
 			)
 			return
 		}
+
 		c.JSON(
 			http.StatusOK,
-			gin.H{"message": "Client updated successfully.", "data": updateOutput},
+			gin.H{"message": "Client updated successfully."},
 		)
 	})
 
@@ -81,26 +87,21 @@ func (r *routerType) opsmeRoutes() {
 			return
 		}
 
-		fetchOutput, errors := FetchClients(clients)
-		if len(errors) > 0 {
-			errorMessages := make([]string, len(errors))
-			for i, err := range errors {
-				errorMessages[i] = err.Error()
-			}
-
+		fetchOutputs, errors := FetchClients(clients)
+		if !isNillArray(errors) {
 			c.JSON(
 				http.StatusInternalServerError,
 				gin.H{
 					"message": "Some clients could not be fetched.",
-					"error":   errorMessages,
-					"data":    fetchOutput,
+					"data":    fetchOutputs,
+					"error":   errors,
 				})
 			return
 		}
 
 		c.JSON(
 			http.StatusOK,
-			gin.H{"message": "Clients fetched successfully.", "data": fetchOutput},
+			gin.H{"message": "Clients fetched successfully.", "data": fetchOutputs},
 		)
 	})
 
@@ -118,7 +119,7 @@ func (r *routerType) opsmeRoutes() {
 		fetchOutput, errors := FetchClients(
 			[]model.Client{*client},
 		)
-		if len(errors) > 0 {
+		if !isNillArray(errors) {
 			c.JSON(
 				http.StatusInternalServerError,
 				gin.H{"message": "Failed to fetch client.", "error": errors[0].Error()},
@@ -133,16 +134,16 @@ func (r *routerType) opsmeRoutes() {
 	})
 }
 
-func UpdateClients(clients []model.Client) ([]opsme.Output, []error) {
+func UpdateClients(clients []model.Client) []error {
 	operator, err := prepareOpsmeMachines(clients)
 	if err != nil {
-		return []opsme.Output{}, err
+		return err
 	}
 
-	results, errors := operator.Run(
+	_, errors := operator.Run(
 		"cd /etc/nixos && just pull && nixos-rebuild switch --flake /etc/nixos#node",
 	)
-	return results, errors
+	return errors
 }
 
 func FetchClients(clients []model.Client) ([]opsme.Output, []error) {
