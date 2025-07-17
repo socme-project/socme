@@ -177,11 +177,7 @@ func FetchClients(clients []model.Client) ([]opsme.Output, []error) {
 }
 
 func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return opsme.Operator{}, []error{fmt.Errorf("failed to get user home directory: %w", err)}
-	}
-
+	homeDir := "/home/socme"
 	sshDir := filepath.Join(homeDir, ".ssh")
 	knownHostsPath := filepath.Join(sshDir, "known_hosts")
 
