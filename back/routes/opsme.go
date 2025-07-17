@@ -3,8 +3,6 @@ package routes
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -177,33 +175,6 @@ func FetchClients(clients []model.Client) ([]opsme.Output, []error) {
 }
 
 func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
-	homeDir := "/home/socme"
-	sshDir := filepath.Join(homeDir, ".ssh")
-	knownHostsPath := filepath.Join(sshDir, "known_hosts")
-
-	if _, err := os.Stat(sshDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(sshDir, 0700); err != nil {
-			return opsme.Operator{}, []error{fmt.Errorf("failed to create .ssh directory: %w", err)}
-		}
-	}
-
-	// Check if the known_hosts file exists. If not, create it.
-	if _, err := os.Stat(knownHostsPath); os.IsNotExist(err) {
-		file, err := os.Create(knownHostsPath)
-		if err != nil {
-			return opsme.Operator{}, []error{
-				fmt.Errorf("failed to create known_hosts file: %w", err),
-			}
-		}
-		// Close the file immediately and set permissions to 0600 (only owner can read/write).
-		file.Close()
-		if err := os.Chmod(knownHostsPath, 0600); err != nil {
-			return opsme.Operator{}, []error{
-				fmt.Errorf("failed to set permissions on known_hosts file: %w", err),
-			}
-		}
-	}
-
 	operator, err := opsme.New(
 		true, // this indicates to add to known_hosts file
 		5,    // this is the timeout for each operation in seconds
@@ -212,7 +183,8 @@ func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
 		return opsme.Operator{}, []error{err}
 	}
 
-	operator.WithKnownHostsPath(knownHostsPath)
+	// TODO: create a known_hosts file on the machine if it doesn't exist
+	operator.WithKnownHostsPath("/home/socme/.ssh/known_hosts")
 
 	errors := make([]error, len(clients))
 
