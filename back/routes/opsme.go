@@ -183,7 +183,7 @@ func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
 		return opsme.Operator{}, []error{err}
 	}
 
-	// TODO: create a known_hosts file on the machine if it doesn't exist
+	// TODO: create a known_hosts file on the machine (core) if it does not exist (or in the configuration)
 	operator.WithKnownHostsPath("/home/socme/.ssh/known_hosts")
 
 	errors := make([]error, len(clients))
