@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -32,6 +33,8 @@ func (r *routerType) opsmeRoutes() {
 		}
 
 		errors := UpdateClients(clients)
+
+		fmt.Println("Errors:", errors)
 		if !isNillArray(errors) {
 			c.JSON(
 				http.StatusInternalServerError,
