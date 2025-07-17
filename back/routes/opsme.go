@@ -3,6 +3,8 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +23,10 @@ func isNillArray(arr []error) bool {
 }
 
 // serializeErrors converts a slice of errors into a slice of strings,
+// skipping any nil errors. This is useful for JSON responses.
 func serializeErrors(errs []error) []string {
+	// Create a slice to hold the error messages.
+	// We only include non-nil errors.
 	errorStrings := make([]string, 0)
 	for _, err := range errs {
 		if err != nil {
@@ -52,7 +57,7 @@ func (r *routerType) opsmeRoutes() {
 				http.StatusInternalServerError,
 				gin.H{
 					"message": "Clients were updated. Some could not be updated.",
-					"error": serializeErrors(errors),
+					"error":   serializeErrors(errors),
 				})
 			return
 		}
@@ -109,7 +114,7 @@ func (r *routerType) opsmeRoutes() {
 				gin.H{
 					"message": "Some clients could not be fetched.",
 					"data":    fetchOutputs,
-					"error": serializeErrors(errors),
+					"error":   serializeErrors(errors),
 				})
 			return
 		}
@@ -150,9 +155,9 @@ func (r *routerType) opsmeRoutes() {
 }
 
 func UpdateClients(clients []model.Client) []error {
-	operator, err := prepareOpsmeMachines(clients)
-	if err != nil {
-		return err
+	operator, errs := prepareOpsmeMachines(clients)
+	if !isNillArray(errs) {
+		return errs
 	}
 
 	_, errors := operator.Run(
@@ -162,9 +167,9 @@ func UpdateClients(clients []model.Client) []error {
 }
 
 func FetchClients(clients []model.Client) ([]opsme.Output, []error) {
-	operator, err := prepareOpsmeMachines(clients)
-	if err != nil {
-		return []opsme.Output{}, err
+	operator, errs := prepareOpsmeMachines(clients)
+	if !isNillArray(errs) {
+		return []opsme.Output{}, errs
 	}
 
 	results, errors := operator.Run("fastfetch")
@@ -172,6 +177,37 @@ func FetchClients(clients []model.Client) ([]opsme.Output, []error) {
 }
 
 func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return opsme.Operator{}, []error{fmt.Errorf("failed to get user home directory: %w", err)}
+	}
+
+	sshDir := filepath.Join(homeDir, ".ssh")
+	knownHostsPath := filepath.Join(sshDir, "known_hosts")
+
+	if _, err := os.Stat(sshDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(sshDir, 0700); err != nil {
+			return opsme.Operator{}, []error{fmt.Errorf("failed to create .ssh directory: %w", err)}
+		}
+	}
+
+	// Check if the known_hosts file exists. If not, create it.
+	if _, err := os.Stat(knownHostsPath); os.IsNotExist(err) {
+		file, err := os.Create(knownHostsPath)
+		if err != nil {
+			return opsme.Operator{}, []error{
+				fmt.Errorf("failed to create known_hosts file: %w", err),
+			}
+		}
+		// Close the file immediately and set permissions to 0600 (only owner can read/write).
+		file.Close()
+		if err := os.Chmod(knownHostsPath, 0600); err != nil {
+			return opsme.Operator{}, []error{
+				fmt.Errorf("failed to set permissions on known_hosts file: %w", err),
+			}
+		}
+	}
+
 	operator, err := opsme.New(
 		true, // this indicates to add to known_hosts file
 		5,    // this is the timeout for each operation in seconds
@@ -209,4 +245,3 @@ func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
 
 	return operator, errors
 }
-
