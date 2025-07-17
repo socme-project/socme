@@ -1,8 +1,5 @@
-{
-  pkgs,
-  lib,
-  self,
-}: let
+{ pkgs, lib, self, }:
+let
   socmeBackend = pkgs.buildGoModule {
     pname = "socme-backend";
     version = "0.1.0";
@@ -12,7 +9,7 @@
 in {
   package = socmeBackend;
 
-  nixosModule = {config, ...}: {
+  nixosModule = { config, ... }: {
     options.services.socme-backend = {
       enable = lib.mkEnableOption "Exposed backend for SOCme";
       domain = lib.mkOption {
@@ -48,7 +45,8 @@ in {
       githubClientId = lib.mkOption {
         type = lib.types.str;
         default = "";
-        description = "Client ID for GitHub OAuth integration in SOCme backend.";
+        description =
+          "Client ID for GitHub OAuth integration in SOCme backend.";
       };
       githubClientSecret = lib.mkOption {
         type = lib.types.str;
@@ -65,8 +63,8 @@ in {
     config = lib.mkIf config.services.socme-backend.enable {
       systemd.services.socme-backend = {
         description = "SOCme Backend Service";
-        after = ["network.target"];
-        wantedBy = ["multi-user.target"];
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           ExecStart = "${self.packages.${pkgs.system}.socme-backend}/bin/cmd";
           Restart = "always";
@@ -74,7 +72,7 @@ in {
           Group = config.services.socme-backend.group;
           DynamicUser = true;
           StateDirectory = "socme-backend";
-          ReadWritePaths = ["/var/lib/socme-backend"];
+          ReadWritePaths = [ "/var/lib/socme-backend" ];
           Environment = [
             "DOMAIN=${toString config.services.socme-backend.domain}"
             "BACKEND_PORT=${toString config.services.socme-backend.port}"
