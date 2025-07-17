@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	wazuhapi "github.com/socme-project/wazuh-go"
 	"github.com/socme-project/backend/model"
+	wazuhapi "github.com/socme-project/wazuh-go"
 )
 
 func (r routerType) UpdateAlertsForClient(client model.Client) error {
@@ -61,13 +61,12 @@ func (r routerType) UpdateAlertsForClient(client model.Client) error {
 		return err
 	}
 	err = model.EditLastAlert(r.Db, client, lastALert)
-
 	if err != nil {
 		r.Logger.Error("Failed to update last alert timestamp in db: " + err.Error())
 		return err
 	}
 
-	// TODO: fastetch here (waiting for opsme integration)
+	// TODO: fastfetch here (waiting for opsme integration)
 	version, err := wazuhClient.GetApiVersion()
 	if err != nil {
 		r.Logger.Error("Failed to retrieve API version: ", err.Error())

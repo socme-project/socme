@@ -165,7 +165,7 @@ func prepareOpsmeMachines(clients []model.Client) (opsme.Operator, []error) {
 		return opsme.Operator{}, []error{err}
 	}
 
-	errors := make([]error, 0, len(clients))
+	errors := make([]error, len(clients))
 
 	for i, client := range clients {
 		SshPortInt, err := strconv.Atoi(client.SshPort)
