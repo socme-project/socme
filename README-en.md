@@ -1,6 +1,5 @@
 # SOCme
 
-- [French version 🇬🇧](./README.md)
 - [Frontend (FR)](./front/README.md)
 - [Frontend (EN)](./front/README-en.md)
 - [Backend (FR)](./back/README.md)
