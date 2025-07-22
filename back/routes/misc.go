@@ -4,16 +4,16 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	certfr_scrapping "github.com/socme-project/cert-fr-scrapping"
+	certfr_scraping "github.com/socme-project/cert-fr-scraping"
 )
 
 func (r *routerType) miscRoutes() {
 	g := r.R.Group("/misc")
 
 	g.GET("certfr", func(c *gin.Context) {
-		alerts := certfr_scrapping.CollectAlert()
-		cti := certfr_scrapping.CollectCti()
-		avis := certfr_scrapping.CollectAvis()
+		alerts := certfr_scraping.CollectAlert()
+		cti := certfr_scraping.CollectCti()
+		avis := certfr_scraping.CollectAvis()
 		c.JSON(
 			http.StatusOK,
 			gin.H{

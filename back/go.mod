@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lithammer/fuzzysearch v1.1.8
-	github.com/socme-project/cert-fr-scrapping v0.0.1
+	github.com/socme-project/cert-fr-scraping v0.0.2
 	github.com/socme-project/opsme v0.0.1
 	github.com/socme-project/wazuh-go v0.1.1
 	golang.org/x/oauth2 v0.30.0
