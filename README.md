@@ -36,7 +36,7 @@ git clone https://github.com/socme-project/socme.git
 3. Installez les pré-requis :
 
 ```bash
-cd front && bun install
+cd front && bun install && cd ../
 ```
 
 4. Buildez l'application :
