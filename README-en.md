@@ -32,6 +32,7 @@ git clone https://github.com/socme-project/socme.git
    - [Just](https://github.com/casey/just)
    - [Golang](https://go.dev/doc/install)
    - [Bun](https://bun.sh/)
+   - [Vite](https://vite.dev/)
 
 3. Install the prerequisites:
 
@@ -68,7 +69,7 @@ just build
 
 ```nix
   services.nginx = {
-    virtualHosts."localhost" = { # Change "localhost" by your domain name if necessary
+    virtualHosts."localhost" = { # Change "localhost" to your domain name if necessary
       root =
         "${inputs.socme.packages.${pkgs.system}.socme-frontend}/socme-frontend";
 
