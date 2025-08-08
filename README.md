@@ -32,6 +32,7 @@ git clone https://github.com/socme-project/socme.git
    - [Just](https://github.com/casey/just)
    - [Golang](https://go.dev/doc/install)
    - [Bun](https://bun.sh/)
+   - [Vite](https://vite.dev/)
 
 3. Installez les pré-requis :
 
