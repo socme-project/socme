@@ -24,11 +24,19 @@
 |              | GET      | `/clients/:id`                | Retrieve a client by ID                           | User |
 |              | POST     | `/clients`                    | Create a new client                           | Admin |
 | **Users**    | GET      | `/users`                      | Retrieve all users                                 | Admin |
-|              | PATCH    | `/users/:id`             | Change the user (except their role)                              | Admin or user |
-|              | PATCH    | `/users/:id/role`             | Change the user's role                              | Admin |
-|              | DELETE   | `/users/:id/session`          | Revoke a session token                    | Admin or user |
-|              | DELETE   | `/users/:id`                  | Delete a user                                 | Admin or user |
+|              | PATCH    | `/users/:id`             | Change the user (except their role)                              | Admin or l'user |
+|              | PATCH    | `/users/:id/role`             | Change the role of the user                              | Admin |
+|              | DELETE   | `/users/:id/session`          | Revoke a session token                    | Admin or l'user |
+|              | DELETE   | `/users/:id`                  | Delete a user                                 | Admin or l'user |
 | **Misc**     | GET      | `/certfr`                     | Retrieve alerts from CERT-FR                        | User |
 | **Auth**     | GET      | `/auth/refresh`               | Refresh the token and user info                     | User |
 | | GET      | `/auth/github`               | Auth with Github | User |
 | | GET      | `/auth/callback`               | Auth callback | User |
+
+## Utilisation
+
+Start the backend:
+
+```bash
+go run ./cmd/main.go
+```
