@@ -1,5 +1,6 @@
 # SOCme
 
+- [English version 🇬🇧](./README-en.md)
 - [Frontend (FR)](./front/README.md)
 - [Frontend (EN)](./front/README-en.md)
 - [Backend (FR)](./back/README.md)
@@ -19,7 +20,7 @@ This repository contains the main application, composed of:
 
 ## Installation
 
-### Manual Installation
+### Installation manuelle
 
 1. Clone the repository:
 
@@ -32,13 +33,19 @@ git clone https://github.com/socme-project/socme.git
    - [Golang](https://go.dev/doc/install)
    - [Bun](https://bun.sh/)
 
-3. Build the application:
+3. Install the prerequisites:
+
+```bash
+cd front && bun install && cd ../
+```
+
+4. Build the application:
 
 ```bash
 just build
 ```
 
-### On NixOS
+### Sur NixOS
 
 1. In the `flake.nix` file, add the `socme` directory in the `inputs` section and import the `socme.nixosModules.socme-backend` module:
 
