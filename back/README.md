@@ -32,3 +32,11 @@
 | **Auth**     | GET      | `/auth/refresh`               | Rafraîchir le jeton et les infos de l'user                     | User |
 | | GET      | `/auth/github`               | Auth avec Github | User |
 | | GET      | `/auth/callback`               | Auth callback | User |
+
+## Utilisation
+
+Démarrez le backend :
+
+```bash
+go run ./cmd/main.go
+```
