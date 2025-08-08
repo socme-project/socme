@@ -33,7 +33,13 @@ git clone https://github.com/socme-project/socme.git
    - [Golang](https://go.dev/doc/install)
    - [Bun](https://bun.sh/)
 
-3. Buildez l'application :
+3. Installez les pré-requis :
+
+```bash
+cd front && bun install
+```
+
+4. Buildez l'application :
 
 ```bash
 just build
