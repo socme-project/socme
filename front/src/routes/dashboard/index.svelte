@@ -157,7 +157,7 @@
     </Card.Content>
   </Card.Root>
 
-  <Card.Root class="flex flex-col">
+    <Card.Root class="flex flex-col">
     <Card.Header class="items-center mb-6">
       <Card.Title class="flex gap-1 items-center "
         ><SignalMedium /> Medium severity</Card.Title
@@ -165,9 +165,9 @@
     </Card.Header>
     <Card.Content class="flex-1 grid items-end">
       {#if statsMedium.length === 0}
-        <Alerts alerts={statsMedium} hexColor="oklch(0.70 0.19 48)" />
+        <Alerts alerts={statsMedium} hexColor="oklch(0.77 0.20 131)" />
       {:else}
-        <Alerts alerts={statsMedium} hexColor="oklch(0.70 0.19 48)" />
+        <Alerts alerts={statsMedium} hexColor="oklch(0.77 0.20 131)" />
       {/if}
     </Card.Content>
   </Card.Root>
@@ -195,9 +195,9 @@
     </Card.Header>
     <Card.Content class="flex-1 grid items-end">
       {#if statsCritical.length === 0}
-        <Alerts alerts={statsCritical} hexColor="oklch(0.70 0.19 48)" />
+        <Alerts alerts={statsCritical} hexColor="oklch(0.64 0.21 25)" />
       {:else}
-        <Alerts alerts={statsCritical} hexColor="oklch(0.70 0.19 48)" />
+        <Alerts alerts={statsCritical} hexColor="oklch(0.64 0.21 25)" />
       {/if}
     </Card.Content>
   </Card.Root>
